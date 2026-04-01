@@ -1,14 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d93026b8-b135-4f92-8c81-8c9c84930ed8" name="Changes" comment="created code">
-      <change beforePath="$PROJECT_DIR$/core/math_engine.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/parser.py" beforeDir="false" />
+    <list default="true" id="d93026b8-b135-4f92-8c81-8c9c84930ed8" name="Changes" comment="new branch">
+      <change afterPath="$PROJECT_DIR$/app/core/app.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/core/coordinates.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/core/integration.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/core/metrics.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/core/utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/core/visualization.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/PyCharmProjects.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/PyCharmProjects.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/core/math_engine.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/core/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/parser.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/main_page.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -39,21 +57,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.main.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "dev-v0.2",
-    "git.auto.fetch.suggestion.counter": "2",
-    "last_opened_file_path": "D:/PyCharm/PyCharmProjects",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;dev-v0.2&quot;,
+    &quot;git.auto.fetch.suggestion.counter&quot;: &quot;2&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/PyCharm/PyCharmProjects&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="PyCharmProjects" />
@@ -103,7 +121,23 @@
       <option name="project" value="LOCAL" />
       <updated>1775060305509</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="new branch">
+      <option name="closed" value="true" />
+      <created>1775071887385</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1775071887385</updated>
+    </task>
+    <task id="LOCAL-00003" summary="new branch">
+      <option name="closed" value="true" />
+      <created>1775071895952</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1775071895952</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -134,6 +168,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="created code" />
-    <option name="LAST_COMMIT_MESSAGE" value="created code" />
+    <MESSAGE value="new branch" />
+    <option name="LAST_COMMIT_MESSAGE" value="new branch" />
   </component>
 </project>
