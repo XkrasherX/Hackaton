@@ -1,52 +1,51 @@
-from pymavlink import mavutil
+from pymavlink import DFReader
 import pandas as pd
+import os
 
 
 def parse_ardupilot_log(file_path: str):
-    """
-    Parse ArduPilot DataFlash log (.BIN or .LOG)
-    Extract GPS and IMU messages.
-    """
 
-    mlog = mavutil.mavlink_connection(file_path)
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(f"File not found: {file_path}")
+
+    log = DFReader.DFReader_binary(file_path)
 
     gps_data = []
     imu_data = []
 
-    while True:
-        msg = mlog.recv_match(blocking=False)
-        if msg is None:
-            break
+    try:
+        while True:
+            msg = log.recv_msg()
+            if msg is None:
+                break
 
-        msg_type = msg.get_type()
+            msg_type = msg.get_type()
 
-        if msg_type == "GPS":
-            gps_data.append({
-                "time_us": msg.TimeUS,
-                "lat": msg.Lat / 1e7,     # deg
-                "lon": msg.Lng / 1e7,     # deg
-                "alt": msg.Alt / 1000.0,  # mm → m
-                "vel": msg.Spd / 100.0,   # cm/s → m/s
-                "satellites": msg.NSats
-            })
+            if msg_type.startswith("GPS"):
+                if hasattr(msg, "Lat") and hasattr(msg, "Lng"):
+                    gps_data.append({
+                        "time_us": getattr(msg, "TimeUS", 0),
+                        "lat": msg.Lat / 1e7,
+                        "lon": msg.Lng / 1e7,
+                        "alt": msg.Alt / 1000.0,
+                    })
 
-        elif msg_type == "IMU":
-            imu_data.append({
-                "time_us": msg.TimeUS,
-                "acc_x": msg.AccX,
-                "acc_y": msg.AccY,
-                "acc_z": msg.AccZ,
-                "gyro_x": msg.GyrX,
-                "gyro_y": msg.GyrY,
-                "gyro_z": msg.GyrZ
-            })
+            if msg_type.startswith("IMU"):
+                imu_data.append({
+                    "time_us": getattr(msg, "TimeUS", 0),
+                    "acc_x": getattr(msg, "AccX", 0),
+                    "acc_y": getattr(msg, "AccY", 0),
+                    "acc_z": getattr(msg, "AccZ", 0),
+                    "gyro_x": getattr(msg, "GyrX", 0),
+                    "gyro_y": getattr(msg, "GyrY", 0),
+                    "gyro_z": getattr(msg, "GyrZ", 0),
+                })
+
+    finally:
+        # 🔥 ОБОВ'ЯЗКОВО закриваємо файл
+        log.close()
 
     gps_df = pd.DataFrame(gps_data)
     imu_df = pd.DataFrame(imu_data)
 
     return gps_df, imu_df
-
-
-def compute_sampling_rate(df, time_column="time_us"):
-    dt = df[time_column].diff().dropna() / 1e6
-    return 1.0 / dt.mean()

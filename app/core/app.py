@@ -38,7 +38,11 @@ if uploaded_file is not None:
     with st.spinner("Парсинг лог-файлу..."):
         gps_df, imu_df = parse_ardupilot_log(tmp_path)
 
-    os.remove(tmp_path)
+    # Безпечне видалення
+    try:
+        os.remove(tmp_path)
+    except PermissionError:
+        pass
 
     if gps_df.empty:
         st.error("GPS дані не знайдені в лог-файлі.")
