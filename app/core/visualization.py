@@ -4,18 +4,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Create 2D top-down view of flight path.
 
 def plot_2d_top_view(df, color_mode="speed"):
-    """
-    Create beautiful 2D top-down view of flight path.
-    
-    Args:
-        df: DataFrame with columns 'east', 'north' (and optionally 'speed', 'time_us')
-        color_mode: "speed" or "time"
-        
-    Returns:
-        plotly figure object
-    """
+
     try:
         # Prepare color values
         if color_mode == "speed" and "speed" in df.columns:
@@ -149,13 +141,7 @@ def plot_2d_top_view(df, color_mode="speed"):
 def plot_altitude_profile(df):
     """
     Create altitude vs. distance profile for detailed analysis.
-    
-    Args:
-        df: DataFrame with columns 'east', 'north', 'up', 'speed' (optional)
-        
-    Returns:
-        plotly figure object
-    """
+"""
     try:
         # Calculate cumulative distance along path
         distances = np.sqrt(np.diff(df["east"])**2 + np.diff(df["north"])**2)
@@ -236,21 +222,9 @@ def plot_altitude_profile(df):
         logger.error(f"Error creating altitude profile: {e}")
         raise
 
-
+# Create interactive 3D trajectory plot with key points.
 def plot_3d_trajectory(df, color_mode="speed"):
-    """
-    Create beautiful interactive 3D trajectory plot with key points.
-    
-    Args:
-        df: DataFrame with columns 'east', 'north', 'up' (and optionally 'speed', 'time_us')
-        color_mode: "speed" or "time" - how to color the trajectory
-        
-    Returns:
-        plotly figure object
-        
-    Raises:
-        ValueError: If required columns are missing
-    """
+
     required_cols = ["east", "north", "up"]
     missing_cols = [col for col in required_cols if col not in df.columns]
     
@@ -322,15 +296,14 @@ def plot_3d_trajectory(df, color_mode="speed"):
             z=[df["up"].iloc[0]],
             mode='markers+text',
             marker=dict(
-                size=14,
+                size=8,
                 color='#00CC00',
-                symbol='diamond',
                 line=dict(color='darkgreen', width=3),
                 opacity=0.9
             ),
-            text=[">> START"],
+            text=["START"],
             textposition="top center",
-            textfont=dict(size=12, color='darkgreen', family='Arial Black'),
+            textfont=dict(size=12, color='black', family='Arial Black'),
             name='Start Point',
             hovertemplate="<b>START</b><br>" +
                           "East: %{x:.1f} m<br>" +
@@ -346,15 +319,15 @@ def plot_3d_trajectory(df, color_mode="speed"):
             z=[df["up"].iloc[-1]],
             mode='markers+text',
             marker=dict(
-                size=14,
+                size=4,
                 color='#FF3333',
                 symbol='x',
-                line=dict(color='darkred', width=3),
+                line=dict(color='red', width=3),
                 opacity=0.9
             ),
             text=["LAND"],
             textposition="top center",
-            textfont=dict(size=12, color='darkred', family='Arial Black'),
+            textfont=dict(size=12, color='black', family='Arial Black'),
             name='Landing Point',
             hovertemplate="<b>LANDING</b><br>" +
                           "East: %{x:.1f} m<br>" +
@@ -375,7 +348,7 @@ def plot_3d_trajectory(df, color_mode="speed"):
                     z=[df.loc[max_alt_idx, "up"]],
                     mode='markers+text',
                     marker=dict(
-                        size=12,
+                        size=8,
                         color='#FFD700',
                         symbol='diamond-open',
                         line=dict(color='orange', width=2)
