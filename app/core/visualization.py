@@ -358,9 +358,9 @@ def plot_3d_trajectory(df, color_mode="speed"):
                     z=[df.loc[max_alt_idx, "up"]],
                     mode='markers+text',
                     marker=dict(
-                        size=11,
+                        size=12,
                         color='#FFD700',
-                        symbol='star',
+                        symbol='diamond-open',
                         line=dict(color='orange', width=2)
                     ),
                     text=[f"⬆ {df.loc[max_alt_idx, 'up']:.1f}m"],
