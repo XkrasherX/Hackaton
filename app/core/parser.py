@@ -20,7 +20,7 @@ class ArduPilotLogParser:
     # -------------------------------------------------
 
     def parse(self):
-        print("🔍 Parsing log...")
+        print("[*] Parsing log...")
 
         msg_types_found = {}
 
@@ -44,7 +44,7 @@ class ArduPilotLogParser:
             elif "PID" in msg_type or msg_type in ["RATE", "ATC"]:
                 self._parse_pid(msg)
 
-        print("✅ Parsing complete")
+        print("[OK] Parsing complete")
         print(f"   Message types found: {sorted(msg_types_found.items())}")
         print(f"   GPS records: {len(self.gps_data)}, IMU records: {len(self.imu_data)}")
 
@@ -56,21 +56,23 @@ class ArduPilotLogParser:
 
     def _parse_gps(self, msg):
         # Handle both old and new field naming conventions
-        lat = getattr(msg, "Lat", getattr(msg, "lat", None))
-        lon = getattr(msg, "Lon", getattr(msg, "lon", None))
-        alt = getattr(msg, "Alt", getattr(msg, "alt", None))
+        # Note: ArduPilot uses "Lng" not "Lon" for longitude
+        lat = getattr(msg, "Lat", None)
+        lng = getattr(msg, "Lng", getattr(msg, "Lon", None))  # Try Lng first, then Lon
+        alt = getattr(msg, "Alt", None)
+        spd = getattr(msg, "Spd", getattr(msg, "Vel", None))
         
-        # Convert to proper units if available
-        lat_deg = lat / 1e7 if lat is not None else None
-        lon_deg = lon / 1e7 if lon is not None else None
-        alt_m = alt / 1000 if alt is not None else None
+        # Values from ArduPilot GPS messages are already in proper units:
+        # - Lat/Lng: decimal degrees
+        # - Alt: meters
+        # - Spd: m/s
         
         self.gps_data.append({
             "TimeUS": getattr(msg, "TimeUS", None),
-            "Lat_deg": lat_deg,
-            "Lon_deg": lon_deg,
-            "Alt_m": alt_m,
-            "Vel_m_s": getattr(msg, "Vel", None),
+            "Lat_deg": lat,  # Already in degrees
+            "Lon_deg": lng,  # Already in degrees
+            "Alt_m": alt,    # Already in meters
+            "Vel_m_s": spd,  # Already in m/s
             "Satellites": getattr(msg, "NSats", getattr(msg, "Nsat", None)),
         })
 

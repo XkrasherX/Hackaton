@@ -19,11 +19,11 @@ def plot_2d_top_view(df, color_mode="speed"):
     try:
         # Prepare color values
         if color_mode == "speed" and "speed" in df.columns:
-            color_values = df["speed"]
+            color_values = df["speed"].values
             color_title = "Speed (m/s)"
             color_scale = "Turbo"
         elif "time_us" in df.columns:
-            color_values = df["time_us"] / 1e6
+            color_values = (df["time_us"] / 1e6).values
             color_title = "Time (s)"
             color_scale = "Plasma"
         else:
@@ -31,17 +31,33 @@ def plot_2d_top_view(df, color_mode="speed"):
             color_title = "Progress (%)"
             color_scale = "Viridis"
         
-        color_values = np.nan_to_num(color_values, nan=0)
+        # Handle NaN values properly
+        color_values = np.asarray(color_values, dtype=float)
+        color_values = np.nan_to_num(color_values, nan=0.0, posinf=0.0, neginf=0.0)
         
         fig = go.Figure()
         
-        # === MAIN PATH ===
-        fig.add_trace(go.Scattergl(
+        # === MAIN PATH (line without colorscale) ===
+        fig.add_trace(go.Scatter(
             x=df["east"],
             y=df["north"],
             mode='lines',
             line=dict(
-                width=4,
+                width=3,
+                color='rgba(100, 150, 200, 0.6)'
+            ),
+            name="Flight Path",
+            hovertemplate="<b>Position</b><br>East: %{x:.1f} m<br>North: %{y:.1f} m<extra></extra>",
+            showlegend=False
+        ))
+        
+        # === PATH MARKERS (with colorscale) ===
+        fig.add_trace(go.Scatter(
+            x=df["east"],
+            y=df["north"],
+            mode='markers',
+            marker=dict(
+                size=6,
                 color=color_values,
                 colorscale=color_scale,
                 colorbar=dict(
@@ -49,9 +65,10 @@ def plot_2d_top_view(df, color_mode="speed"):
                     thickness=20,
                     len=0.7
                 ),
-                showscale=True
+                showscale=True,
+                opacity=0.7
             ),
-            name="Flight Path",
+            name="Progress",
             hovertemplate="<b>Position</b><br>East: %{x:.1f} m<br>North: %{y:.1f} m<extra></extra>",
             showlegend=False
         ))
@@ -184,16 +201,14 @@ def plot_altitude_profile(df):
                 gridcolor='rgba(200, 200, 200, 0.3)'
             ),
             yaxis=dict(
-                title="<b>Altitude (m)</b>",
-                titlefont=dict(color='#1f77b4'),
+                title=dict(text="<b>Altitude (m)</b>", font=dict(color='#1f77b4')),
                 tickfont=dict(color='#1f77b4'),
                 showgrid=True,
                 gridwidth=1,
                 gridcolor='rgba(200, 200, 200, 0.3)'
             ),
             yaxis2=dict(
-                title="<b>Speed (m/s)</b>",
-                titlefont=dict(color='#ff7f0e'),
+                title=dict(text="<b>Speed (m/s)</b>", font=dict(color='#ff7f0e')),
                 tickfont=dict(color='#ff7f0e'),
                 anchor='free',
                 overlaying='y',
@@ -250,11 +265,11 @@ def plot_3d_trajectory(df, color_mode="speed"):
         if color_mode == "speed":
             if "speed" not in df.columns:
                 logger.warning("'speed' column not found, using time as color")
-                color_values = df["time_us"] / 1e6 if "time_us" in df.columns else np.arange(len(df))
+                color_values = (df["time_us"] / 1e6).values if "time_us" in df.columns else np.arange(len(df))
                 color_title = "Time (s)"
                 color_scale = "Blues"
             else:
-                color_values = df["speed"]
+                color_values = df["speed"].values
                 color_title = "Speed (m/s)"
                 color_scale = "Turbo"
         else:  # time mode
@@ -264,12 +279,14 @@ def plot_3d_trajectory(df, color_mode="speed"):
                 color_title = "Sample Index"
                 color_scale = "Viridis"
             else:
-                color_values = df["time_us"] / 1e6
+                color_values = (df["time_us"] / 1e6).values
                 color_title = "Time (s)"
                 color_scale = "Plasma"
         
-        # Handle NaN values
-        color_values = np.nan_to_num(color_values, nan=0)
+        # Handle NaN values properly and convert to list for Plotly
+        color_values = np.asarray(color_values, dtype=float)
+        color_values = np.nan_to_num(color_values, nan=0.0, posinf=0.0, neginf=0.0)
+        color_values = color_values.tolist()  # Convert numpy array to Python list
         
         # === MAIN TRAJECTORY LINE ===
         fig = go.Figure(data=[go.Scatter3d(
@@ -311,7 +328,7 @@ def plot_3d_trajectory(df, color_mode="speed"):
                 line=dict(color='darkgreen', width=3),
                 opacity=0.9
             ),
-            text=["🚀 START"],
+            text=[">> START"],
             textposition="top center",
             textfont=dict(size=12, color='darkgreen', family='Arial Black'),
             name='Start Point',
@@ -363,7 +380,7 @@ def plot_3d_trajectory(df, color_mode="speed"):
                         symbol='diamond-open',
                         line=dict(color='orange', width=2)
                     ),
-                    text=[f"⬆ {df.loc[max_alt_idx, 'up']:.1f}m"],
+                    text=[f"MAX: {df.loc[max_alt_idx, 'up']:.1f}m"],
                     textposition="top center",
                     textfont=dict(size=10, color='orange'),
                     name='Max Altitude',

@@ -114,7 +114,7 @@ if uploaded_file is not None:
         tmp_file.write(uploaded_file.read())
         tmp_path = tmp_file.name
 
-    st.success("✅ File uploaded successfully!")
+    st.success("[OK] File uploaded successfully!")
 
     # Parse log file
     try:
@@ -175,7 +175,7 @@ if uploaded_file is not None:
 
         # Validate data
         if gps_df.empty:
-            st.error("❌ No valid GPS data found in log file. Check file format and try another file.")
+            st.error("[ERROR] No valid GPS data found in log file. Check file format and try another file.")
             logger.error(f"GPS dataframe empty after cleaning. Original size: {len(imu_df)}")
             st.stop()
 
@@ -403,7 +403,7 @@ if uploaded_file is not None:
             if anomalies and "No major anomalies" not in anomalies:
                 st.warning(anomalies)
             else:
-                st.success("✅ No significant anomalies detected")
+                st.success("[OK] No significant anomalies detected")
             
             st.markdown("### 💡 Recommendations")
             st.success(analysis.get('recommendations', ''))
@@ -457,13 +457,13 @@ if uploaded_file is not None:
                 )
 
     except FileNotFoundError as e:
-        st.error(f"❌ File error: {e}")
+        st.error(f"[ERROR] File error: {e}")
         logger.error(f"File not found: {e}")
     except ValueError as e:
-        st.error(f"❌ Data error: {e}")
+        st.error(f"[ERROR] Data error: {e}")
         logger.error(f"Data validation error: {e}")
     except Exception as e:
-        st.error(f"❌ Unexpected error: {e}")
+        st.error(f"[ERROR] Unexpected error: {e}")
         logger.error(f"Unexpected error: {e}", exc_info=True)
         
         # Clean up on error
