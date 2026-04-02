@@ -22,17 +22,20 @@ class ArduPilotLogParser:
     def parse(self):
         print("🔍 Parsing log...")
 
+        msg_types_found = {}
+
         while True:
             msg = self.log.recv_match(blocking=False)
             if msg is None:
                 break
 
             msg_type = msg.get_type()
+            msg_types_found[msg_type] = msg_types_found.get(msg_type, 0) + 1
 
-            if msg_type in ["GPS", "GPS_RAW_INT"]:
+            if msg_type in ["GPS", "GPS_RAW_INT", "GPS2_RAW"]:
                 self._parse_gps(msg)
 
-            elif msg_type in ["IMU", "RAW_IMU", "SCALED_IMU2"]:
+            elif msg_type in ["IMU", "RAW_IMU", "SCALED_IMU", "SCALED_IMU2"]:
                 self._parse_imu(msg)
 
             elif msg_type in ["ATT", "ATTITUDE"]:
@@ -42,6 +45,8 @@ class ArduPilotLogParser:
                 self._parse_pid(msg)
 
         print("✅ Parsing complete")
+        print(f"   Message types found: {sorted(msg_types_found.items())}")
+        print(f"   GPS records: {len(self.gps_data)}, IMU records: {len(self.imu_data)}")
 
         return self._build_output()
 
@@ -50,13 +55,23 @@ class ArduPilotLogParser:
     # -------------------------------------------------
 
     def _parse_gps(self, msg):
+        # Handle both old and new field naming conventions
+        lat = getattr(msg, "Lat", getattr(msg, "lat", None))
+        lon = getattr(msg, "Lon", getattr(msg, "lon", None))
+        alt = getattr(msg, "Alt", getattr(msg, "alt", None))
+        
+        # Convert to proper units if available
+        lat_deg = lat / 1e7 if lat is not None else None
+        lon_deg = lon / 1e7 if lon is not None else None
+        alt_m = alt / 1000 if alt is not None else None
+        
         self.gps_data.append({
             "TimeUS": getattr(msg, "TimeUS", None),
-            "Lat_deg": getattr(msg, "Lat", None) / 1e7 if hasattr(msg, "Lat") else None,
-            "Lon_deg": getattr(msg, "Lon", None) / 1e7 if hasattr(msg, "Lon") else None,
-            "Alt_m": getattr(msg, "Alt", None) / 1000 if hasattr(msg, "Alt") else None,
+            "Lat_deg": lat_deg,
+            "Lon_deg": lon_deg,
+            "Alt_m": alt_m,
             "Vel_m_s": getattr(msg, "Vel", None),
-            "Satellites": getattr(msg, "NSats", None),
+            "Satellites": getattr(msg, "NSats", getattr(msg, "Nsat", None)),
         })
 
     # -------------------------------------------------

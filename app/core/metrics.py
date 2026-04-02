@@ -71,6 +71,7 @@ def compute_speed_components(gps_df):
     dt = gps_df["time_us"].diff() / 1e6
     dt[0] = 1  # Avoid division by zero for first element
     dt = dt.replace(0, 1)  # Avoid division by zero
+    dt = np.maximum(dt, 0.001)  # Minimum 1ms to avoid extreme values
 
     horizontal_dist = [
         haversine(
@@ -84,7 +85,12 @@ def compute_speed_components(gps_df):
     ]
 
     horizontal_speed = np.array(horizontal_dist) / dt.values
-    vertical_speed = gps_df["alt"].diff() / dt.values
+    
+    # Handle missing altitude values
+    if "alt" in gps_df.columns:
+        vertical_speed = gps_df["alt"].diff() / dt.values
+    else:
+        vertical_speed = np.zeros_like(horizontal_speed)
 
     return horizontal_speed, vertical_speed
 

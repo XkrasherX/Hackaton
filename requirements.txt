@@ -5,3 +5,4 @@ pyproj
 plotly
 scipy
 streamlit
+groq

@@ -124,7 +124,48 @@ if uploaded_file is not None:
         status_text.text("🔍 Parsing log file...")
         progress_bar.progress(10)
         
-        gps_df, imu_df = parse_ardupilot_log(tmp_path)
+        parser = ArduPilotLogParser(tmp_path)
+        gps_df, imu_df, att_df, pid_df, sampling_info, meta_info = parser.parse()
+
+        # Rename columns for consistency with metrics functions
+        gps_df = gps_df.rename(columns={
+            "Lat_deg": "lat",
+            "Lon_deg": "lon",
+            "Alt_m": "alt",
+            "TimeUS": "time_us"
+        })
+        imu_df = imu_df.rename(columns={
+            "TimeUS": "time_us",
+            "AccX": "acc_x",
+            "AccY": "acc_y",
+            "AccZ": "acc_z",
+            "GyrX": "gyr_x",
+            "GyrY": "gyr_y",
+            "GyrZ": "gyr_z"
+        })
+        att_df = att_df.rename(columns={"TimeUS": "time_us"})
+        pid_df = pid_df.rename(columns={"TimeUS": "time_us"})
+
+        # Debug: Check raw GPS data
+        logger.info(f"Raw GPS records: {len(gps_df)}")
+        logger.info(f"GPS columns: {gps_df.columns.tolist() if not gps_df.empty else 'empty'}")
+        if not gps_df.empty:
+            logger.info(f"GPS null counts: {gps_df.isnull().sum().to_dict()}")
+
+        # Clean GPS data - only require lat and lon
+        gps_df = gps_df.dropna(subset=["lat", "lon"])
+        
+        # Clean IMU data - check for renamed columns
+        if "acc_x" in imu_df.columns and "acc_y" in imu_df.columns and "acc_z" in imu_df.columns:
+            imu_df = imu_df.dropna(subset=["acc_x", "acc_y", "acc_z"])
+        
+        # Fill missing altitude values with interpolation
+        if "alt" in gps_df.columns:
+            gps_df["alt"] = gps_df["alt"].interpolate(method="linear", limit_direction="both")
+        
+        # Fill missing time_us with forward fill then backward fill
+        if "time_us" in gps_df.columns and gps_df["time_us"].isnull().any():
+            gps_df["time_us"] = gps_df["time_us"].ffill().bfill()
 
         # Clean up temporary file
         try:
@@ -134,7 +175,8 @@ if uploaded_file is not None:
 
         # Validate data
         if gps_df.empty:
-            st.error("❌ No GPS data found in log file.")
+            st.error("❌ No valid GPS data found in log file. Check file format and try another file.")
+            logger.error(f"GPS dataframe empty after cleaning. Original size: {len(imu_df)}")
             st.stop()
 
         logger.info(f"Parsed {len(gps_df)} GPS records and {len(imu_df)} IMU records")
