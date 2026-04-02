@@ -5,7 +5,7 @@ import tempfile
 import os
 import logging
 
-from parser import parse_ardupilot_log
+from parser import ArduPilotLogParser
 from coordinates import wgs84_to_ecef, ecef_to_enu
 from metrics import (
     compute_total_distance_haversine,

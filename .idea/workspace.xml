@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d93026b8-b135-4f92-8c81-8c9c84930ed8" name="Changes" comment="changed parser.py and app.py so now we can read data from a bin files and visualise it in 3d model">
+    <list default="true" id="d93026b8-b135-4f92-8c81-8c9c84930ed8" name="Changes" comment="changed parser.py for reading all types of bin-data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/core/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/parser.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/core/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/app.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -151,7 +151,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775105317073</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="changed parser.py for reading all types of bin-data">
+      <option name="closed" value="true" />
+      <created>1775109661844</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1775109661844</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -185,6 +193,7 @@
     <MESSAGE value="new branch" />
     <MESSAGE value="created files with code" />
     <MESSAGE value="changed parser.py and app.py so now we can read data from a bin files and visualise it in 3d model" />
-    <option name="LAST_COMMIT_MESSAGE" value="changed parser.py and app.py so now we can read data from a bin files and visualise it in 3d model" />
+    <MESSAGE value="changed parser.py for reading all types of bin-data" />
+    <option name="LAST_COMMIT_MESSAGE" value="changed parser.py for reading all types of bin-data" />
   </component>
 </project>
