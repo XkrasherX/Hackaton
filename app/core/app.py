@@ -15,7 +15,7 @@ from metrics import (
     compute_duration
 )
 from integration import compute_velocity_from_acc
-from visualization import plot_3d_trajectory
+from visualization import plot_3d_trajectory, plot_2d_top_view, plot_altitude_profile
 from ai_analysis import analyze_flight_with_ai, format_analysis_for_display
 
 # Configure logging
@@ -263,25 +263,81 @@ if uploaded_file is not None:
         
         st.line_chart(speed_data.set_index('Time (s)'), use_container_width=True)
 
-        # === 3D VISUALIZATION ===
+        # === VISUALIZATION TABS ===
 
-        st.markdown("## 🧭 3D Flight Trajectory")
-
-        col_color, col_type = st.columns(2)
+        st.markdown("## 🗺️ Flight Visualizations")
         
-        with col_color:
-            color_mode = st.selectbox(
-                "Trajectory coloring:",
-                ["speed", "time"],
-                help="Color trajectory by speed or elapsed time"
-            )
+        # Create tabs for different visualization types
+        tab1, tab2, tab3 = st.tabs(["🧭 3D Trajectory", "🗺️ Top View", "📈 Altitude Profile"])
+        
+        with tab1:
+            st.markdown("### Interactive 3D Flight Path")
+            col_color, col_type = st.columns(2)
+            
+            with col_color:
+                color_mode = st.selectbox(
+                    "Trajectory coloring:",
+                    ["speed", "time"],
+                    help="Color trajectory by speed or elapsed time",
+                    key="3d_color"
+                )
 
-        try:
-            fig = plot_3d_trajectory(gps_df, color_mode=color_mode)
-            st.plotly_chart(fig, use_container_width=True)
-        except Exception as e:
-            st.error(f"Error creating 3D visualization: {e}")
-            logger.error(f"Visualization error: {e}")
+            try:
+                fig = plot_3d_trajectory(gps_df, color_mode=color_mode)
+                st.plotly_chart(fig, use_container_width=True)
+                st.markdown("""
+                **How to use:**
+                - 🖱️ **Rotate**: Click and drag to rotate
+                - 🔍 **Zoom**: Scroll wheel to zoom in/out
+                - 📍 **Pan**: Right-click and drag to move
+                - 🏠 **Reset**: Double-click to reset view
+                """)
+            except Exception as e:
+                st.error(f"Error creating 3D visualization: {e}")
+                logger.error(f"3D Visualization error: {e}")
+        
+        with tab2:
+            st.markdown("### Flight Path - Birds Eye View")
+            col_color2, _ = st.columns(2)
+            
+            with col_color2:
+                color_mode2 = st.selectbox(
+                    "Path coloring:",
+                    ["speed", "time"],
+                    help="Color path by speed or elapsed time",
+                    key="2d_color"
+                )
+            
+            try:
+                fig2d = plot_2d_top_view(gps_df, color_mode=color_mode2)
+                st.plotly_chart(fig2d, use_container_width=True)
+                st.markdown("""
+                **Top-down view shows:**
+                - Direct flight path (East-North plane)
+                - Start (🟢 green diamond) and landing point (❌ red cross)
+                - Direct distance between start and end
+                - Horizontal routing patterns
+                """)
+            except Exception as e:
+                st.error(f"Error creating 2D visualization: {e}")
+                logger.error(f"2D Visualization error: {e}")
+        
+        with tab3:
+            st.markdown("### Altitude & Speed Dynamics")
+            
+            try:
+                fig_alt = plot_altitude_profile(gps_df)
+                st.plotly_chart(fig_alt, use_container_width=True)
+                st.markdown("""
+                **Profile Analysis:**
+                - 🔵 **Blue line**: Altitude over distance (left axis)
+                - 🟠 **Orange dashed line**: Speed over distance (right axis)
+                - Shows climb/descent patterns and speed changes
+                - Useful for identifying maneuvers and flight phases
+                """)
+            except Exception as e:
+                st.error(f"Error creating altitude profile: {e}")
+                logger.error(f"Altitude profile error: {e}")
 
         # === AI ANALYSIS ===
         

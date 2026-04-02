@@ -11,7 +11,7 @@ from .metrics import (
     haversine
 )
 from .integration import compute_velocity_from_acc, trapezoidal_integration
-from .visualization import plot_3d_trajectory
+from .visualization import plot_3d_trajectory, plot_2d_top_view, plot_altitude_profile
 from .utils import merge_gps_coordinates, export_csv, export_json, create_summary_report
 from .ai_analysis import analyze_flight_with_ai, format_analysis_for_display, fallback_flight_analysis
 from .theory import (
@@ -34,6 +34,8 @@ __all__ = [
     "compute_velocity_from_acc",
     "trapezoidal_integration",
     "plot_3d_trajectory",
+    "plot_2d_top_view",
+    "plot_altitude_profile",
     "merge_gps_coordinates",
     "export_csv",
     "export_json",

@@ -5,9 +5,226 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def plot_2d_top_view(df, color_mode="speed"):
+    """
+    Create beautiful 2D top-down view of flight path.
+    
+    Args:
+        df: DataFrame with columns 'east', 'north' (and optionally 'speed', 'time_us')
+        color_mode: "speed" or "time"
+        
+    Returns:
+        plotly figure object
+    """
+    try:
+        # Prepare color values
+        if color_mode == "speed" and "speed" in df.columns:
+            color_values = df["speed"]
+            color_title = "Speed (m/s)"
+            color_scale = "Turbo"
+        elif "time_us" in df.columns:
+            color_values = df["time_us"] / 1e6
+            color_title = "Time (s)"
+            color_scale = "Plasma"
+        else:
+            color_values = np.arange(len(df))
+            color_title = "Progress (%)"
+            color_scale = "Viridis"
+        
+        color_values = np.nan_to_num(color_values, nan=0)
+        
+        fig = go.Figure()
+        
+        # === MAIN PATH ===
+        fig.add_trace(go.Scattergl(
+            x=df["east"],
+            y=df["north"],
+            mode='lines',
+            line=dict(
+                width=4,
+                color=color_values,
+                colorscale=color_scale,
+                colorbar=dict(
+                    title=f"<b>{color_title}</b>",
+                    thickness=20,
+                    len=0.7
+                ),
+                showscale=True
+            ),
+            name="Flight Path",
+            hovertemplate="<b>Position</b><br>East: %{x:.1f} m<br>North: %{y:.1f} m<extra></extra>",
+            showlegend=False
+        ))
+        
+        # === START ===
+        fig.add_trace(go.Scatter(
+            x=[df["east"].iloc[0]],
+            y=[df["north"].iloc[0]],
+            mode='markers+text',
+            marker=dict(size=15, color='#00CC00', symbol='diamond', line=dict(color='darkgreen', width=2)),
+            text=['START'],
+            textposition="top center",
+            textfont=dict(size=11, color='darkgreen', family='Arial Black'),
+            name='Start',
+            hovertemplate="<b>START</b><extra></extra>",
+            showlegend=True
+        ))
+        
+        # === END ===
+        fig.add_trace(go.Scatter(
+            x=[df["east"].iloc[-1]],
+            y=[df["north"].iloc[-1]],
+            mode='markers+text',
+            marker=dict(size=15, color='#FF3333', symbol='x', line=dict(color='darkred', width=2)),
+            text=['LAND'],
+            textposition="top center",
+            textfont=dict(size=11, color='darkred', family='Arial Black'),
+            name='Landing',
+            hovertemplate="<b>LANDING</b><extra></extra>",
+            showlegend=True
+        ))
+        
+        # === DISTANCE & DIRECTION ===
+        total_dist = np.sqrt((df["east"].iloc[-1] - df["east"].iloc[0])**2 + 
+                            (df["north"].iloc[-1] - df["north"].iloc[0])**2)
+        
+        fig.update_layout(
+            title={
+                'text': f"<b>Flight Path - Top View</b><br><sub>Straight distance: {total_dist:.1f} m</sub>",
+                'x': 0.5,
+                'xanchor': 'center',
+                'font': {'size': 18}
+            },
+            xaxis=dict(
+                title="<b>East (m)</b>",
+                showgrid=True,
+                gridwidth=1,
+                gridcolor='rgba(200, 200, 200, 0.3)'
+            ),
+            yaxis=dict(
+                title="<b>North (m)</b>",
+                showgrid=True,
+                gridwidth=1,
+                gridcolor='rgba(200, 200, 200, 0.3)'
+            ),
+            width=800,
+            height=700,
+            showlegend=True,
+            legend=dict(
+                x=0.01,
+                y=0.99,
+                bgcolor='rgba(255, 255, 255, 0.9)',
+                bordercolor='gray',
+                borderwidth=1
+            ),
+            plot_bgcolor='rgba(240, 240, 245, 0.5)',
+            paper_bgcolor='white',
+            hovermode='closest'
+        )
+        
+        return fig
+    
+    except Exception as e:
+        logger.error(f"Error creating 2D top view: {e}")
+        raise
+
+
+def plot_altitude_profile(df):
+    """
+    Create altitude vs. distance profile for detailed analysis.
+    
+    Args:
+        df: DataFrame with columns 'east', 'north', 'up', 'speed' (optional)
+        
+    Returns:
+        plotly figure object
+    """
+    try:
+        # Calculate cumulative distance along path
+        distances = np.sqrt(np.diff(df["east"])**2 + np.diff(df["north"])**2)
+        cumulative_dist = np.concatenate(([0], np.cumsum(distances)))
+        
+        # Create figure with secondary y-axis for speed
+        fig = go.Figure()
+        
+        # === ALTITUDE LINE ===
+        fig.add_trace(go.Scatter(
+            x=cumulative_dist,
+            y=df["up"],
+            mode='lines',
+            name='Altitude',
+            line=dict(color='#1f77b4', width=3),
+            yaxis='y1',
+            fill='tozeroy',
+            fillcolor='rgba(31, 119, 180, 0.2)',
+            hovertemplate="<b>Position</b><br>Distance: %{x:.1f} m<br>Altitude: %{y:.1f} m<extra></extra>",
+            showlegend=True
+        ))
+        
+        # === SPEED OVERLAY (if available) ===
+        if "speed" in df.columns:
+            fig.add_trace(go.Scatter(
+                x=cumulative_dist,
+                y=df["speed"],
+                mode='lines',
+                name='Speed',
+                line=dict(color='#ff7f0e', width=2, dash='dash'),
+                yaxis='y2',
+                hovertemplate="<b>Speed</b><br>Distance: %{x:.1f} m<br>Speed: %{y:.2f} m/s<extra></extra>",
+                showlegend=True,
+                opacity=0.7
+            ))
+        
+        fig.update_layout(
+            title="<b>Altitude Profile & Speed Dynamics</b>",
+            xaxis=dict(
+                title="<b>Distance Along Path (m)</b>",
+                showgrid=True,
+                gridwidth=1,
+                gridcolor='rgba(200, 200, 200, 0.3)'
+            ),
+            yaxis=dict(
+                title="<b>Altitude (m)</b>",
+                titlefont=dict(color='#1f77b4'),
+                tickfont=dict(color='#1f77b4'),
+                showgrid=True,
+                gridwidth=1,
+                gridcolor='rgba(200, 200, 200, 0.3)'
+            ),
+            yaxis2=dict(
+                title="<b>Speed (m/s)</b>",
+                titlefont=dict(color='#ff7f0e'),
+                tickfont=dict(color='#ff7f0e'),
+                anchor='free',
+                overlaying='y',
+                side='right',
+                position=0.99
+            ),
+            width=1000,
+            height=500,
+            showlegend=True,
+            legend=dict(
+                x=0.01,
+                y=0.99,
+                bgcolor='rgba(255, 255, 255, 0.9)',
+                bordercolor='gray',
+                borderwidth=1
+            ),
+            plot_bgcolor='rgba(240, 240, 245, 0.5)',
+            paper_bgcolor='white',
+            hovermode='x unified'
+        )
+        
+        return fig
+    
+    except Exception as e:
+        logger.error(f"Error creating altitude profile: {e}")
+        raise
+
+
 def plot_3d_trajectory(df, color_mode="speed"):
     """
-    Create interactive 3D trajectory plot.
+    Create beautiful interactive 3D trajectory plot with key points.
     
     Args:
         df: DataFrame with columns 'east', 'north', 'up' (and optionally 'speed', 'time_us')
@@ -35,82 +252,238 @@ def plot_3d_trajectory(df, color_mode="speed"):
                 logger.warning("'speed' column not found, using time as color")
                 color_values = df["time_us"] / 1e6 if "time_us" in df.columns else np.arange(len(df))
                 color_title = "Time (s)"
+                color_scale = "Blues"
             else:
                 color_values = df["speed"]
                 color_title = "Speed (m/s)"
+                color_scale = "Turbo"
         else:  # time mode
             if "time_us" not in df.columns:
                 logger.warning("'time_us' column not found, using index as color")
                 color_values = np.arange(len(df))
                 color_title = "Sample Index"
+                color_scale = "Viridis"
             else:
                 color_values = df["time_us"] / 1e6
                 color_title = "Time (s)"
+                color_scale = "Plasma"
         
         # Handle NaN values
         color_values = np.nan_to_num(color_values, nan=0)
         
-        # Create 3D scatter plot
+        # === MAIN TRAJECTORY LINE ===
         fig = go.Figure(data=[go.Scatter3d(
             x=df["east"],
             y=df["north"],
             z=df["up"],
             mode='lines',
             line=dict(
-                width=6,
+                width=8,
                 color=color_values,
-                colorscale="Viridis",
+                colorscale=color_scale,
                 colorbar=dict(
-                    title=color_title,
-                    thickness=15,
+                    title=f"<b>{color_title}</b>",
+                    thickness=20,
                     len=0.7,
-                    x=1.02
+                    x=1.08,
+                    tickfont=dict(size=11)
                 ),
                 showscale=True
             ),
-            name="Flight Path"
+            name="Flight Path",
+            hovertemplate="<b>Trajectory</b><br>" +
+                          "East: %{x:.1f} m<br>" +
+                          "North: %{y:.1f} m<br>" +
+                          "Altitude: %{z:.1f} m<extra></extra>",
+            showlegend=False
         )])
         
-        # Add start and end markers
+        # === START POINT ===
         fig.add_trace(go.Scatter3d(
             x=[df["east"].iloc[0]],
             y=[df["north"].iloc[0]],
             z=[df["up"].iloc[0]],
-            mode='markers',
-            marker=dict(size=10, color='green'),
-            name='Start',
+            mode='markers+text',
+            marker=dict(
+                size=14,
+                color='#00CC00',
+                symbol='diamond',
+                line=dict(color='darkgreen', width=3),
+                opacity=0.9
+            ),
+            text=["🚀 START"],
+            textposition="top center",
+            textfont=dict(size=12, color='darkgreen', family='Arial Black'),
+            name='Start Point',
+            hovertemplate="<b>START</b><br>" +
+                          "East: %{x:.1f} m<br>" +
+                          "North: %{y:.1f} m<br>" +
+                          "Altitude: %{z:.1f} m<extra></extra>",
             showlegend=True
         ))
         
+        # === END POINT ===
         fig.add_trace(go.Scatter3d(
             x=[df["east"].iloc[-1]],
             y=[df["north"].iloc[-1]],
             z=[df["up"].iloc[-1]],
-            mode='markers',
-            marker=dict(size=10, color='red'),
-            name='End',
+            mode='markers+text',
+            marker=dict(
+                size=14,
+                color='#FF3333',
+                symbol='x',
+                line=dict(color='darkred', width=3),
+                opacity=0.9
+            ),
+            text=["LAND"],
+            textposition="top center",
+            textfont=dict(size=12, color='darkred', family='Arial Black'),
+            name='Landing Point',
+            hovertemplate="<b>LANDING</b><br>" +
+                          "East: %{x:.1f} m<br>" +
+                          "North: %{y:.1f} m<br>" +
+                          "Altitude: %{z:.1f} m<extra></extra>",
             showlegend=True
         ))
         
-        # Update layout
+        # === KEY ALTITUDE POINTS ===
+        if "up" in df.columns:
+            max_alt_idx = df["up"].idxmax()
+            min_alt_idx = df["up"].idxmin()
+            
+            if max_alt_idx != df.index[0] and max_alt_idx != df.index[-1]:
+                fig.add_trace(go.Scatter3d(
+                    x=[df.loc[max_alt_idx, "east"]],
+                    y=[df.loc[max_alt_idx, "north"]],
+                    z=[df.loc[max_alt_idx, "up"]],
+                    mode='markers+text',
+                    marker=dict(
+                        size=11,
+                        color='#FFD700',
+                        symbol='star',
+                        line=dict(color='orange', width=2)
+                    ),
+                    text=[f"⬆ {df.loc[max_alt_idx, 'up']:.1f}m"],
+                    textposition="top center",
+                    textfont=dict(size=10, color='orange'),
+                    name='Max Altitude',
+                    hovertemplate="<b>MAX ALTITUDE</b><br>" +
+                                  "Altitude: %{z:.1f} m<extra></extra>",
+                    showlegend=True
+                ))
+        
+        # === SPEED MARKERS (every 25% of flight for visual guides) ===
+        if len(df) > 4:
+            step = len(df) // 4
+            for i in range(1, 4):
+                idx = i * step
+                if idx < len(df):
+                    fig.add_trace(go.Scatter3d(
+                        x=[df.iloc[idx]["east"]],
+                        y=[df.iloc[idx]["north"]],
+                        z=[df.iloc[idx]["up"]],
+                        mode='markers',
+                        marker=dict(
+                            size=6,
+                            color='rgba(100, 100, 255, 0.5)',
+                            symbol='circle'
+                        ),
+                        showlegend=False,
+                        hovertemplate="<b>Waypoint " + str(i) + "</b><br>" +
+                                      "Progress: " + str(int(100*i/4)) + "%<extra></extra>"
+                    ))
+        
+        # === REFERENCE PLANE (ground level) ===
+        min_east = df["east"].min()
+        max_east = df["east"].max()
+        min_north = df["north"].min()
+        max_north = df["north"].max()
+        
+        # Add ground reference plane
+        fig.add_trace(go.Surface(
+            x=[[min_east, max_east], [min_east, max_east]],
+            y=[[min_north, min_north], [max_north, max_north]],
+            z=[[0, 0], [0, 0]],
+            colorscale=[[0, 'rgba(200, 200, 200, 0.1)'], [1, 'rgba(200, 200, 200, 0.1)']],
+            showscale=False,
+            hoverinfo='skip',
+            opacity=0.2,
+            name='Ground Level'
+        ))
+        
+        # === LAYOUT ===
         fig.update_layout(
-            title="3D Flight Trajectory (ENU Coordinates)",
+            title={
+                'text': "<b>3D Flight Trajectory Analysis</b><br>" +
+                        "<sub>Interactive 3D visualization of flight path (ENU coordinates)</sub>",
+                'x': 0.5,
+                'xanchor': 'center',
+                'font': {'size': 20}
+            },
             scene=dict(
-                xaxis=dict(title="East (m)"),
-                yaxis=dict(title="North (m)"),
-                zaxis=dict(title="Up/Altitude (m)"),
-                aspectmode='data'
+                xaxis=dict(
+                    title="<b>East (m)</b>",
+                    showgrid=True,
+                    gridwidth=1,
+                    gridcolor='rgba(200, 200, 200, 0.3)',
+                    zeroline=True,
+                    zerolinewidth=2,
+                    zerolinecolor='rgba(100, 100, 100, 0.5)'
+                ),
+                yaxis=dict(
+                    title="<b>North (m)</b>",
+                    showgrid=True,
+                    gridwidth=1,
+                    gridcolor='rgba(200, 200, 200, 0.3)',
+                    zeroline=True,
+                    zerolinewidth=2,
+                    zerolinecolor='rgba(100, 100, 100, 0.5)'
+                ),
+                zaxis=dict(
+                    title="<b>Altitude (m)</b>",
+                    showgrid=True,
+                    gridwidth=1,
+                    gridcolor='rgba(200, 200, 200, 0.3)',
+                    zeroline=True,
+                    zerolinewidth=2,
+                    zerolinecolor='rgba(100, 100, 100, 0.5)'
+                ),
+                aspectmode='data',
+                bgcolor='rgba(245, 245, 250, 0.5)',
+                camera=dict(
+                    eye=dict(x=1.5, y=1.5, z=1.3)  # Better default viewing angle
+                )
             ),
-            width=1000,
+            width=1200,
             height=800,
             showlegend=True,
             legend=dict(
-                x=0.02,
-                y=0.98,
-                bgcolor='rgba(255, 255, 255, 0.8)',
-                bordercolor='black',
-                borderwidth=1
-            )
+                x=0.01,
+                y=0.99,
+                bgcolor='rgba(255, 255, 255, 0.9)',
+                bordercolor='rgba(100, 100, 100, 0.5)',
+                borderwidth=2,
+                font=dict(size=11),
+                tracegroupgap=10
+            ),
+            margin=dict(l=0, r=150, t=100, b=0),
+            font=dict(family='Arial, sans-serif', size=12, color='#333333'),
+            plot_bgcolor='rgba(240, 240, 245, 0.5)',
+            paper_bgcolor='white',
+            hovermode='closest'
+        )
+        
+        # Add interaction instructions
+        fig.add_annotation(
+            text="💡 <b>Rotate</b>: Click + Drag | <b>Zoom</b>: Scroll",
+            xref="paper", yref="paper",
+            x=0.01, y=0.01,
+            showarrow=False,
+            bgcolor="rgba(255, 255, 255, 0.8)",
+            bordercolor="gray",
+            borderwidth=1,
+            font=dict(size=10, color="gray"),
+            align="left"
         )
         
         return fig

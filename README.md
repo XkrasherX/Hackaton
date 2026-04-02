@@ -512,8 +512,7 @@ gps_df, imu_df = parse_ardupilot_log('data/00000001.BIN')
 
 Для повної інформації про нові функції перегляньте:
 
-- **[ENHANCED_FEATURES.md](ENHANCED_FEATURES.md)** - AI análіз, модуль theory, покращений дашборд
-- **[INSTALL.md](INSTALL.md)** - Детальні інструкції встановлення
+- **[ENHANCED_FEATURES.md](ENHANCED_FEATURES.md)** - AI análіз, модуль theory, покращений дашборд- **[VISUALIZATION_IMPROVEMENTS.md](VISUALIZATION_IMPROVEMENTS.md)** - Красиві 3D графіки та профілі (НОВЕ)- **[INSTALL.md](INSTALL.md)** - Детальні інструкції встановлення
 - **[app/core/theory.py](app/core/theory.py)** - Математичні основи (кватерніони, інтегрування, координати)
 - **[app/core/ai_analysis.py](app/core/ai_analysis.py)** - LLM-інтеграція та аналіз
 ## 🎯 Розпочнути
