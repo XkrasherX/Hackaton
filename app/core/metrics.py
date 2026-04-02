@@ -1,5 +1,7 @@
 import numpy as np
+import logging
 
+logger = logging.getLogger(__name__)
 
 EARTH_RADIUS = 6371000  # meters
 
@@ -7,8 +9,9 @@ EARTH_RADIUS = 6371000  # meters
 def haversine(lat1, lon1, lat2, lon2):
     """
     Compute distance between two WGS84 points in meters.
+    Uses the Haversine formula for accurate geodetic distances.
     """
-
+    
     lat1 = np.radians(lat1)
     lon1 = np.radians(lon1)
     lat2 = np.radians(lat2)
@@ -26,6 +29,19 @@ def haversine(lat1, lon1, lat2, lon2):
 
 
 def compute_total_distance_haversine(gps_df):
+    """
+    Compute total horizontal distance traveled using Haversine formula.
+    
+    Args:
+        gps_df: DataFrame with 'lat', 'lon' columns
+        
+    Returns:
+        float: Total distance in meters
+    """
+    if gps_df.empty or len(gps_df) < 2:
+        logger.warning("Empty or insufficient GPS data for distance calculation")
+        return 0.0
+    
     total = 0.0
     for i in range(1, len(gps_df)):
         d = haversine(
@@ -39,7 +55,22 @@ def compute_total_distance_haversine(gps_df):
 
 
 def compute_speed_components(gps_df):
+    """
+    Compute horizontal and vertical speed components from GPS data.
+    
+    Args:
+        gps_df: DataFrame with 'lat', 'lon', 'alt', 'time_us' columns
+        
+    Returns:
+        tuple: (horizontal_speed, vertical_speed) as numpy arrays
+    """
+    if gps_df.empty or len(gps_df) < 2:
+        logger.warning("Empty or insufficient GPS data for speed calculation")
+        return np.array([]), np.array([])
+    
     dt = gps_df["time_us"].diff() / 1e6
+    dt[0] = 1  # Avoid division by zero for first element
+    dt = dt.replace(0, 1)  # Avoid division by zero
 
     horizontal_dist = [
         haversine(
@@ -52,22 +83,48 @@ def compute_speed_components(gps_df):
         for i in range(len(gps_df))
     ]
 
-    horizontal_speed = np.array(horizontal_dist) / dt
-    vertical_speed = gps_df["alt"].diff() / dt
+    horizontal_speed = np.array(horizontal_dist) / dt.values
+    vertical_speed = gps_df["alt"].diff() / dt.values
 
     return horizontal_speed, vertical_speed
 
 
 def compute_max_acceleration(imu_df):
+    """
+    Compute maximum acceleration magnitude from IMU data.
+    
+    Args:
+        imu_df: DataFrame with 'acc_x', 'acc_y', 'acc_z' columns
+        
+    Returns:
+        float: Maximum acceleration magnitude in m/s^2
+    """
+    if imu_df.empty or not all(col in imu_df.columns for col in ["acc_x", "acc_y", "acc_z"]):
+        logger.warning("Empty or incomplete IMU data for acceleration calculation")
+        return 0.0
+    
     acc_mag = np.sqrt(
         imu_df["acc_x"]**2 +
         imu_df["acc_y"]**2 +
         imu_df["acc_z"]**2
     )
-    return acc_mag.max()
+    return float(np.nanmax(acc_mag))
 
 
 def compute_max_altitude_gain(gps_df):
+    """
+    Compute cumulative maximum altitude gain (only positive changes).
+    
+    Args:
+        gps_df: DataFrame with 'alt' column
+        
+    Returns:
+        float: Maximum cumulative altitude gain in meters
+    """
+    if gps_df.empty or len(gps_df) < 2:
+        logger.warning("Empty or insufficient GPS data for altitude calculation")
+        return 0.0
+    
     cumulative_gain = 0
     max_gain = 0
 
@@ -81,5 +138,18 @@ def compute_max_altitude_gain(gps_df):
 
 
 def compute_duration(gps_df):
-    return (gps_df["time_us"].iloc[-1] -
-            gps_df["time_us"].iloc[0]) / 1e6
+    """
+    Compute flight duration from GPS timestamp range.
+    
+    Args:
+        gps_df: DataFrame with 'time_us' column
+        
+    Returns:
+        float: Duration in seconds
+    """
+    if gps_df.empty or len(gps_df) < 2:
+        logger.warning("Empty or insufficient GPS data for duration calculation")
+        return 0.0
+    
+    duration = (gps_df["time_us"].iloc[-1] - gps_df["time_us"].iloc[0]) / 1e6
+    return float(duration)
