@@ -1,8 +1,129 @@
 # 🚀 ArduPilot Flight Log Analyzer
 
-Автоматизована система розбору лог-файлів польотних контролерів на базі ArduPilot з візуалізацією маршруту та обчисленням підсумкових метрик польоту.
+Automated system for parsing flight controller logs from ArduPilot-based drones with trajectory visualization and flight metrics calculation.
 
-**🔥 [⚡ Швидкий Старт За 2 Хв](QUICK_START.md)** | Повний опис нижче
+**🔥 [⚡ Quick Start (2 min)](QUICK_START.md)** | [📚 Technical Justification](TECHNICAL_JUSTIFICATION.md) | Full description below
+
+---
+
+## 📋 Quick Running Instructions  
+
+### **Web App** (Easiest)
+```bash
+# 1. Activate virtual environment
+.venv\Scripts\Activate.ps1  # Windows
+# or
+source .venv/bin/activate  # macOS/Linux
+
+# 2. Start web app
+streamlit run app/core/app.py
+
+# 3. Open http://localhost:8501 and upload your .BIN file
+```
+
+### **Command Line**
+```bash
+python app/main.py data/00000001.BIN  # Outputs: CSV, HTML visualization, metrics
+```
+
+### **First Time Setup**
+```bash
+python -m venv .venv
+source .venv/bin/activate  # or .\.venv\Scripts\Activate.ps1 on Windows
+pip install -r requirements.txt
+pip install groq          # Optional: for AI analysis
+```
+
+**See [TECHNICAL_JUSTIFICATION.md](TECHNICAL_JUSTIFICATION.md) for detailed step-by-step instructions**
+
+---
+
+## ⚙️ Why These Technologies?
+
+### **Coordinate Transformations: WGS-84 → ECEF → ENU**
+
+**Why This Approach?**
+
+GPS provides coordinates in WGS-84 (latitude, longitude, altitude), but we need:
+1. **Local, intuitive coordinates** for flight visualization
+2. **Proper accounting for Earth's curvature** (not flat!)
+3. **Accurate distances** between waypoints
+
+**The Solution:**
+- **WGS-84** (GPS output) → Angles on Earth's ellipsoid
+- **ECEF** (intermediate) → Cartesian coordinates with Earth at center
+- **ENU** (local) → Local Cartesian system (East, North, Up) relative to takeoff point
+
+**Why Not Use Euclidean Distance on GPS Angles?**
+- At equator: ~2% error per kilometer (compounding!)
+- At higher latitudes: ~5-10% error
+- Treats angles as if they were Cartesian coordinates (wrong!)
+
+**Solution: Haversine Formula** 
+```
+Accurately accounts for Earth's spherical geometry
+Precision: ±0.5% for distances under 1000 km
+```
+
+See [TECHNICAL_JUSTIFICATION.md](TECHNICAL_JUSTIFICATION.md) Section 1 for detailed mathematical derivations.
+
+### **Numerical Integration: Trapezoidal Rule**
+
+**Why integrate acceleration?**
+- IMU provides acceleration at 100-400 Hz
+- GPS provides position at only 1-10 Hz
+- Need smooth velocity estimates between GPS updates
+
+**Why Trapezoidal Rule?**
+- Works with **irregular** time intervals (GPS dropouts, sensor noise)
+- Simpson's rule requires **even spacing** (would need interpolation)
+- Error: O(Δt²) per step, acceptable for 100+ Hz sampling
+
+**The Drift Problem:**
+```
+Small acceleration bias → quadratic position error
+Even 0.1 m/s² bias → 900 meters position error in 1 minute!
+```
+
+**Solution: Sensor Fusion**
+- Use GPS for long-term accuracy (ground truth)
+- Use IMU for high-frequency details
+- Best of both worlds
+
+See [TECHNICAL_JUSTIFICATION.md](TECHNICAL_JUSTIFICATION.md) Section 3 for detailed error analysis.
+
+### **Orientation: Quaternions vs Euler Angles**
+
+**Euler Angles Problem: GIMBAL LOCK**
+```
+When aircraft pitch = ±90° (vertical):
+- Roll and Yaw become indistinguishable
+- Small angle changes produce large rotations  
+- Numerical integration breaks down
+```
+
+**Quaternion Solution:**
+- **No singularities** at any orientation
+- **Smooth interpolation** (SLERP) between attitudes
+- **Numerically stable** everywhere
+- Industry standard (used in all flight controllers)
+
+See [TECHNICAL_JUSTIFICATION.md](TECHNICAL_JUSTIFICATION.md) Section 4 for complete mathematical explanation.
+
+### **Technology Stack Justification**
+
+| Component | Technology | Why Not Alternative? |
+|-----------|----------|----------------------|
+| **Data Processing** | Pandas + NumPy | Pure Python loops would be 100x slower |
+| **Log Parsing** | PyMavlink (official) | Manual binary parsing would be error-prone |
+| **Coordinate Math** | PyProj (PROJ library) | Hardcoding WGS-84 parameters would be brittle |
+| **3D Visualization** | Plotly (interactive web) | Matplotlib (static images) vs Mayavi (external software) |
+| **Web Interface** | Streamlit | No HTML/CSS/JS needed, Python-only |
+| **AI Analysis** | Groq LLM (free tier) | Only provider with free tier + no credit card required |
+
+**Full Technology Justification:** See [TECHNICAL_JUSTIFICATION.md](TECHNICAL_JUSTIFICATION.md) Section 5
+
+---
 
 ## 🤖 AI Flight Analysis (NEW!)
 
@@ -129,85 +250,260 @@ d = R*c
 - **📊 Інтерактивний дашборд**: Streamlit веб-інтерфейс з метриками, графіками та експортом
 - **📚 Математичне обґрунтування**: Детальні пояснення всіх алгоритмів та теорії
 
-## 🏗️ Структура проекту
+## 🏗️ Project Structure
 
 ```
 d:/PyCharm/PyCharmProjects/
 ├── app/
 │   ├── __init__.py
-│   ├── main.py                 # CLI інтерфейс
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── app.py             # Streamlit web-додаток (ПОКРАЩЕНО)
-│   │   ├── parser.py          # Парсинг бінарних логів
-│   │   ├── coordinates.py     # Координатні перетворення
-│   │   ├── metrics.py         # Обчислення метрик
-│   │   ├── integration.py     # Чисельне інтегрування
-│   │   ├── visualization.py   # 3D візуалізація
-│   │   ├── utils.py           # Утиліти
-│   │   ├── theory.py          # Математичні основи (НОВЕ)
-│   │   └── ai_analysis.py     # LLM-аналіз (НОВЕ)
+│   ├── main.py                   # CLI interface
+│   ├── theory.py                 # Mathematical foundations
+│   └── core/
+│       ├── __init__.py
+│       ├── app.py               # Streamlit web app
+│       ├── parser.py            # Binary log parsing
+│       ├── coordinates.py       # Coordinate transformations
+│       ├── metrics.py           # Flight metrics computation
+│       ├── integration.py       # Numerical integration
+│       ├── visualization.py     # 3D visualization
+│       ├── utils.py             # Utility functions
+│       └── ai_analysis.py       # LLM integration
 ├── data/
-│   ├── 00000001.BIN           # Приклад лог-файлу
-│   └── 00000019.BIN           # Приклад лог-файлу
-├── requirements.txt            # Залежності Python
-├── README.md                   # Цей файл
-├── INSTALL.md                 # Детальні інструкції встановлення
-├── ENHANCED_FEATURES.md        # Документація нових функцій (НОВЕ)
-└── example.py                 # Приклад скрипту
+│   ├── 00000001.BIN             # Example flight log
+│   └── 00000019.BIN             # Example flight log
+├── requirements.txt              # Python dependencies
+├── README.md                     # This file
+├── QUICK_START.md               # 2-minute quickstart
+├── INSTALL.md                   # Installation instructions
+├── TECHNICAL_JUSTIFICATION.md    # Technology choices & math (NEW!)
+├── ENHANCED_FEATURES.md          # New features documentation
+└── example.py                    # Example script
 ```
 
-## 📦 Залежності
+---
 
-### Обов'язкові
-- **pandas** - Обробка табличних даних
-- **numpy** - Чисельні обчислення
-- **pymavlink** - Парсинг ArduPilot логів
-- **pyproj** - Координатні перетворення
-- **plotly** - Інтерактивна 3D візуалізація
-- **scipy** - Наукові обчислення
-- **streamlit** - Web-інтерфейс
+## 📚 Step-by-Step Running Instructions
 
-### Опціональні
-- **groq** - AI аналіз (потрібен для LLM-функцій, якщо немає API ключа, система працює без нього)
+### **STEP 1: Initial Setup (One-time)**
 
-## 🚀 Установка і запуск
+#### On Windows (PowerShell):
+```powershell
+# Navigate to project directory
+cd d:\PyCharm\PyCharmProjects
 
-### Встановлення залежностей
+# Create virtual environment
+python -m venv .venv
+
+# Activate virtual environment
+.\.venv\Scripts\Activate.ps1
+
+# Install all dependencies
+pip install --upgrade pip  
+pip install -r requirements.txt
+
+# Optional: Install AI support
+pip install groq
+```
+
+#### On macOS/Linux:
+```bash
+# Navigate to project directory
+cd /path/to/PyCharmProjects
+
+# Create virtual environment
+python3 -m venv .venv
+
+# Activate virtual environment
+source .venv/bin/activate
+
+# Install all dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+
+# Optional: Install AI support
+pip install groq
+```
+
+### **STEP 2: Verify Installation**
+```bash
+python -c "import pymavlink; print('✓ PyMavlink OK')"
+python -c "import pandas; print('✓ Pandas OK')"
+python -c "import numpy; print('✓ NumPy OK')"
+python -c "import streamlit; print('✓ Streamlit OK')"
+```
+
+### **STEP 3: Run the Web Application** (Recommended)
 
 ```bash
-pip install -r requirements.txt
+# Make sure virtual environment is ACTIVE
+# You should see (.venv) at the start of your command prompt
+
+streamlit run app/core/app.py
 ```
 
-### CLI версія
+Expected output:
+```
+  You can now view your Streamlit app in your browser.
+  URL: http://localhost:8501
+```
 
-Аналіз лог-файлу через командний рядок:
+**Then:**
+1. Open http://localhost:8501 in your browser
+2. Upload a `.BIN` or `.LOG` flight log file
+3. See flight metrics and interactive 3D visualization
+
+### **STEP 4: Alternative - Command Line Analysis**
 
 ```bash
 python app/main.py data/00000001.BIN
 ```
 
-Результати:
-- Виведення метрик в консоль
-- Експорт HTML-файлу з 3D візуалізацією (`00000001_trajectory.html`)
-- Експорт CSV-файлу з оброблених даних (`00000001_processed.csv`)
+Generates:
+- `00000001_processed.csv` - Processed flight data in ENU coordinates
+- `00000001_trajectory.html` - Standalone 3D visualization
+- Console output with all flight metrics
 
-### Streamlit Web-додаток
+### **STEP 5: Optional - Configure AI Analysis**
 
-Запуск інтерактивного веб-інтерфейсу:
+**Option A: Environment Variable (Recommended)**
+
+*Windows PowerShell:*
+```powershell
+$env:GROQ_API_KEY = "your_key_here"
+streamlit run app/core/app.py
+```
+
+*Windows Command Prompt:*
+```cmd
+set GROQ_API_KEY=your_key_here
+streamlit run app/core/app.py
+```
+
+*macOS/Linux:*
+```bash
+export GROQ_API_KEY="your_key_here"
+streamlit run app/core/app.py
+```
+
+**Option B: Get Free Groq API Key**
+1. Visit https://console.groq.com/
+2. Sign up (no credit card required)
+3. Get free API key (30 requests/minute tier)
+4. Set as environment variable above
+
+### **Common Issues & Solutions**
+
+#### "Command 'streamlit' not found"
+```bash
+# Verify virtual environment is active (should show (.venv))
+pip install streamlit --upgrade
+python -m streamlit run app/core/app.py
+```
+
+#### "Port 8501 already in use"
+```bash
+streamlit run app/core/app.py --server.port 8502
+```
+
+#### "Module 'pymavlink' not found"
+```bash
+pip install pymavlink --upgrade
+```
+
+#### "ModuleNotFoundError" after installing packages
+```bash
+# Ensure virtual environment is ACTIVE
+# Reinstall all packages
+pip install -r requirements.txt --force-reinstall
+```
+
+---
+
+## 📦 Dependencies & Technology Justification
+
+### Core Libraries
+
+- **pandas** - Data table operations (100x faster than Python loops)
+- **numpy** - Numerical computation with vectorization
+- **pymavlink** - Official ArduPilot binary log parser
+- **pyproj** - Coordinate transformations (WGS-84, ECEF, ENU)
+- **plotly** - Interactive 3D web visualization
+- **streamlit** - Python-only web framework (no HTML/CSS/JS needed)
+- **scipy** - Scientific computing utilities
+- **groq** (optional) - LLM for AI flight analysis
+
+### Technology Choices Explained
+
+**Why these specific tools?**
+
+1. **PyMavlink (not manual binary parsing)**
+   - Official parser from ArduPilot project
+   - Handles all sensor message types automatically 
+   - Stays compatible with firmware updates
+
+2. **PyProj (not hardcoded transformation matrices)**
+   - Industry-standard PROJ library
+   - Handles all WGS-84 ellipsoid parameters
+   - Tested against millions of real coordinates
+
+3. **Plotly (not Matplotlib)**
+   - Interactive 3D (rotate, zoom with mouse)
+   - Exports standalone HTML files
+   - Works in any browser without additional software
+
+4. **Streamlit (not Flask/Django)**
+   - Python-only, no HTML/CSS/JavaScript needed
+   - Automatic reactive UI updates
+   - Minimal boilerplate code
+
+5. **Groq (not OpenAI/Claude)**
+   - Free tier (no credit card)
+   - Fastest inference speed (100+ tokens/sec)
+   - Mixtral-8x7B model excels at numeric reasoning
+
+**See [TECHNICAL_JUSTIFICATION.md](TECHNICAL_JUSTIFICATION.md) for detailed mathematical and engineering justifications**
+
+## 📤 Dependencies
+
+### Required
+- **pandas** - Tabular data processing
+- **numpy** - Numerical computation
+- **pymavlink** - ArduPilot log parsing
+- **pyproj** - Coordinate transformations
+- **plotly** - Interactive 3D visualization
+- **scipy** - Scientific computations
+- **streamlit** - Web interface
+
+### Optional
+- **groq** - AI analysis (system works offline without it)
+
+## 🚀 Installation & Running
+
+### Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### CLI Version
+
+```bash
+python app/main.py data/00000001.BIN
+```
+
+Output files:
+- HTML interactive 3D visualization
+- CSV with processed flight data
+- Console metrics output
+
+### Streamlit Web App
 
 ```bash
 streamlit run app/core/app.py
 ```
 
-Потім відкрийте браузер на адресі `http://localhost:8501`
+Open http://localhost:8501 in browser
 
-**Функціональність:**
-- Завантаження `.BIN` або `.LOG` файлів через drag-and-drop
-- Обчислення та відображення всіх метрик в реальному часі
-- Інтерактивна 3D-візуалізація з можливістю обертання та масштабування
-- Вибір способу колорування траєкторії (за швидкістю або часом)
-- Експорт даних у CSV-форматі
 
 ## 📊 Обчислювані метрики
 
