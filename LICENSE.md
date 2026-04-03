@@ -2,7 +2,7 @@
 
 ## ArduPilot Flight Log Analyzer
 
-**Copyright © 2024-2026 ArduPilot Flight Analysis Project Contributors**
+**Copyright © 2026 Team of Danylo Chemerys, Maksim Yakymovych, Nataliia Oleskiv **
 
 All rights reserved.
 
@@ -137,7 +137,7 @@ This software may be freely distributed under the terms of the MIT License. No w
 ```
 MIT License
 
-Copyright (c) 2024-2026 ArduPilot Flight Analysis Project Contributors
+Copyright (c) 2026 Team of Danylo Chemerys, Maksim Yakymovych, Nataliia Oleskiv
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
