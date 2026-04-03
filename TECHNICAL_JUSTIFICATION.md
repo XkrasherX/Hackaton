@@ -836,7 +836,7 @@ streamlit run app/core/app.py
 
 **In Your Browser:**
 1. Open http://localhost:8501
-2. Page shows "📁 Upload Flight Log"
+2. Page shows "Upload Flight Log"
 3. Drag-and-drop a `.BIN` or `.LOG` file
 
 **Features Available:**
@@ -1035,14 +1035,3 @@ python -m pylint app/core/*.py
 ```
 
 ---
-
-## Summary
-
-This flight log analyzer combines:
-
-1. **Mathematical Rigor:** Correct coordinate transformations, numerical integration, and distance calculations
-2. **Practical Engineering:** Sensor fusion between GPS and IMU, robust error handling
-3. **Modern Technology Stack:** Python for rapid development, Streamlit for UI, Groq for AI
-4. **User-Friendly Design:** Simple web interface, no installation complexity, optional advanced features
-
-All technology choices made to maximize accuracy, usability, and maintainability while minimizing dependencies and complexity.
