@@ -102,13 +102,9 @@ with st.sidebar:
     st.markdown("---")
     st.header("🔗 Links")
     
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("[📘 Documentation](https://github.com/Nestors1234/ArduPilot-Flight-Log-Analyzer)")
-    with col2:
-        st.markdown("[⭐ GitHub](https://github.com/Nestors1234/ArduPilot-Flight-Log-Analyzer)")
-    with col3:
-        st.markdown("[💬 Support](https://github.com/Nestors1234/ArduPilot-Flight-Log-Analyzer/issues)")
+    st.markdown("[📘 Documentation](https://github.com/Nestors1234/ArduPilot-Flight-Log-Analyzer)")
+    st.markdown("[⭐ GitHub](https://github.com/Nestors1234/ArduPilot-Flight-Log-Analyzer)")
+    st.markdown("[💬 Support](https://github.com/Nestors1234/ArduPilot-Flight-Log-Analyzer/issues)")
     
     st.markdown("---")
     st.markdown("""
