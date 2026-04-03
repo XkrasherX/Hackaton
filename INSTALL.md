@@ -127,32 +127,34 @@ streamlit run app/core/app.py --logger.level=debug
 ## File Structure After Installation
 
 ```
-d:\PyCharm\PyCharmProjects\
+d:/PyCharm/PyCharmProjects/
 ├── .venv/                          # Virtual environment
 │   └── Scripts/
 │       └── python.exe, pip.exe     # Python executables
 ├── app/
-│   ├── main.py                     # CLI interface
-│   ├── core/
-│   │   ├── app.py                 # Streamlit app
-│   │   ├── parser.py              # Log parsing
-│   │   ├── metrics.py             # Flight metrics
-│   │   ├── coordinates.py         # Coordinate transformation
-│   │   ├── integration.py         # Numerical integration
-│   │   ├── visualization.py       # 3D visualization
-│   │   └── __init__.py
-│   └── __init__.py
+│   ├── theory.py                 # Mathematical foundations
+│   └── core/
+│       ├── __init__.py
+│       ├── app.py               # Streamlit web app
+│       ├── parser.py            # Binary log parsing
+│       ├── coordinates.py       # Coordinate transformations
+│       ├── metrics.py           # Flight metrics computation
+│       ├── integration.py       # Numerical integration
+│       ├── visualization.py     # 3D visualization
+│       ├── utils.py             # Utility functions
+│       └── ai_analysis.py       # LLM integration
 ├── data/
-│   ├── 00000001.BIN               # Example log
-│   ├── 00000019.BIN               # Example log
-│   ├── 00000001_trajectory.html   # Generated output
-│   ├── 00000001_processed.csv     # Generated output
-│   └── 00000001_analysis.csv      # Generated output
+│   ├── 00000001.BIN             # Example flight log
+│   └── 00000019.BIN             # Example flight log
+├── requirements.txt              # Python dependencies
+├── README.md                     # This file
+├── QUICK_START.md               # 2-minute quickstart
+├── INSTALL.md                   # Installation instructions
+├── TECHNICAL_JUSTIFICATION.md    # Technology choices & math (NEW!)
+├── ENHANCED_FEATURES.md          # New features documentation
+└── example.py                    # Example script
 ├── .streamlit/
 │   └── config.toml                # Streamlit configuration
-├── requirements.txt               # Python dependencies
-├── README.md                      # Project documentation
-├── INSTALL.md                     # This file
 ├── example.py                     # Example usage script
 └── .gitignore                     # Git ignore rules
 ```
