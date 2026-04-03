@@ -187,7 +187,6 @@ If Groq API is unavailable:
 ```
 d:/PyCharm/PyCharmProjects/
 ├── app/
-│   ├── __init__.py
 │   ├── theory.py                 # Mathematical foundations
 │   └── core/
 │       ├── __init__.py
