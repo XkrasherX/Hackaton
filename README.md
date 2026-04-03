@@ -206,6 +206,7 @@ d:/PyCharm/PyCharmProjects/
 ├── QUICK_START.md               # 2-minute quickstart
 ├── INSTALL.md                   # Installation instructions
 ├── TECHNICAL_JUSTIFICATION.md    # Technology choices & math (NEW!)
+├── ENHANCED_FEATURES.md          # New features documentation
 └── example.py                    # Example script
 ```
 
