@@ -5,7 +5,7 @@ import tempfile
 import os
 import logging
 
-from parser import ArduPilotLogParser
+from parser import parse_ardupilot_log, ArduPilotLogParser
 from coordinates import wgs84_to_ecef, ecef_to_enu
 from metrics import (
     compute_total_distance_haversine,
@@ -15,8 +15,13 @@ from metrics import (
     compute_duration
 )
 from integration import compute_velocity_from_acc
-from visualization import plot_3d_trajectory, plot_2d_top_view, plot_altitude_profile
+from visualization import plot_3d_trajectory, plot_2d_top_view, plot_altitude_profile, plot_flight_map
 from ai_analysis import analyze_flight_with_ai, format_analysis_for_display
+
+try:
+    import streamlit_folium
+except ImportError:
+    streamlit_folium = None
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -93,6 +98,24 @@ with st.sidebar:
         type="password",
         help="Get free key from https://console.groq.com/"
     )
+    
+    st.markdown("---")
+    st.header("🔗 Links")
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("[📘 Documentation](https://github.com/Nestors1234/ArduPilot-Flight-Log-Analyzer)")
+    with col2:
+        st.markdown("[⭐ GitHub](https://github.com/Nestors1234/ArduPilot-Flight-Log-Analyzer)")
+    with col3:
+        st.markdown("[💬 Support](https://github.com/Nestors1234/ArduPilot-Flight-Log-Analyzer/issues)")
+    
+    st.markdown("---")
+    st.markdown("""
+    <small>🚀 **ArduPilot Flight Log Analyzer**  
+    Advanced analysis tool for drone flight logs  
+    Version 2.1 | April 2026</small>
+    """, unsafe_allow_html=True)
 
 st.markdown("""
 **Advanced flight analysis for ArduPilot flight controllers**
@@ -283,33 +306,45 @@ if uploaded_file is not None:
                 f"{max_alt_gain:.2f} m"
             )
 
-        # Altitude profile
-        st.markdown("## 🏔️ Altitude Profile")
+        # === ALTITUDE & SPEED PROFILES ===
         
-        alt_data = pd.DataFrame({
-            'Time (s)': (gps_df['time_us'] - gps_df['time_us'].iloc[0]) / 1e6,
-            'Altitude (m)': gps_df['alt']
-        })
-        
-        st.line_chart(alt_data.set_index('Time (s)'), use_container_width=True)
+        with st.expander("🏔️ Altitude Profile Over Time", expanded=False):
+            st.markdown("""
+            **📊 What this graph shows:**
+            - X-axis: Time elapsed from flight start (seconds)
+            - Y-axis: Altitude above reference point (meters)
+            - Shows climb and descent patterns
+            - Sharp angles indicate rapid altitude changes
+            """)
+            
+            alt_data = pd.DataFrame({
+                'Time (s)': (gps_df['time_us'] - gps_df['time_us'].iloc[0]) / 1e6,
+                'Altitude (m)': gps_df['alt']
+            })
+            st.line_chart(alt_data.set_index('Time (s)'), use_container_width=True)
 
-        # Speed profile
-        st.markdown("## 💨 Speed Profile")
-        
-        speed_data = pd.DataFrame({
-            'Time (s)': (gps_df['time_us'] - gps_df['time_us'].iloc[0]) / 1e6,
-            'Horiz. Speed (m/s)': horizontal_speed,
-            'Vert. Speed (m/s)': vertical_speed
-        })
-        
-        st.line_chart(speed_data.set_index('Time (s)'), use_container_width=True)
+        with st.expander("💨 Speed Profile Over Time", expanded=False):
+            st.markdown("""
+            **📊 What this graph shows:**
+            - X-axis: Time elapsed from flight start (seconds)
+            - Y-axis (Blue): Horizontal speed across ground (m/s)
+            - Y-axis (Orange): Vertical speed up/down (m/s)
+            - Helps identify acceleration and maneuver patterns
+            """)
+            
+            speed_data = pd.DataFrame({
+                'Time (s)': (gps_df['time_us'] - gps_df['time_us'].iloc[0]) / 1e6,
+                'Horiz. Speed (m/s)': horizontal_speed,
+                'Vert. Speed (m/s)': vertical_speed
+            })
+            st.line_chart(speed_data.set_index('Time (s)'), use_container_width=True)
 
         # === VISUALIZATION TABS ===
 
         st.markdown("## 🗺️ Flight Visualizations")
         
         # Create tabs for different visualization types
-        tab1, tab2, tab3 = st.tabs(["🧭 3D Trajectory", "🗺️ Top View", "📈 Altitude Profile"])
+        tab1, tab2, tab3, tab4 = st.tabs(["🧭 3D Trajectory", "🗺️ Top View", "📈 Altitude Profile", "🌍 Flight Map"])
         
         with tab1:
             st.markdown("### Interactive 3D Flight Path")
@@ -379,6 +414,28 @@ if uploaded_file is not None:
             except Exception as e:
                 st.error(f"Error creating altitude profile: {e}")
                 logger.error(f"Altitude profile error: {e}")
+        
+        with tab4:
+            st.markdown("### Interactive Flight Map")
+            
+            st.markdown("""
+            **🌍 Interactive Map Legend:**
+            - 🟢 **Green Marker (START)**: Takeoff location
+            - 🔴 **Red Marker (LANDING)**: Landing location
+            - 🟠 **Orange Marker (⬆)**: Maximum altitude point
+            - 🔵 **Blue Dots & Line**: Flight path with speed indicators (dot size = speed)
+            - 📍 **Info Box** (bottom-right): Flight statistics
+            """)
+            
+            try:
+                if streamlit_folium:
+                    map_flight = plot_flight_map(gps_df)
+                    streamlit_folium.folium_static(map_flight)
+                else:
+                    st.warning("Folium not available. Install with: pip install folium streamlit-folium")
+            except Exception as e:
+                st.error(f"Error creating flight map: {e}")
+                logger.error(f"Flight map error: {e}")
 
         # === AI ANALYSIS ===
         
@@ -434,26 +491,50 @@ if uploaded_file is not None:
         
         st.markdown("## 📥 Export Data")
         
-        col_gps, col_imu = st.columns(2)
+        col_gps, col_imu, col_combined = st.columns(3)
         
         with col_gps:
             csv_gps = gps_df.to_csv(index=False)
             st.download_button(
-                label="📥 Download GPS Data (CSV)",
+                label="📍 GPS Data (CSV)",
                 data=csv_gps,
                 file_name=f"{os.path.splitext(uploaded_file.name)[0]}_gps.csv",
-                mime="text/csv"
+                mime="text/csv",
+                use_container_width=True
             )
         
         with col_imu:
             if not imu_df.empty:
                 csv_imu = imu_df.to_csv(index=False)
                 st.download_button(
-                    label="📥 Download IMU Data (CSV)",
+                    label="📊 IMU Data (CSV)",
                     data=csv_imu,
                     file_name=f"{os.path.splitext(uploaded_file.name)[0]}_imu.csv",
-                    mime="text/csv"
+                    mime="text/csv",
+                    use_container_width=True
                 )
+            else:
+                st.info("No IMU data available")
+        
+        with col_combined:
+            # Create combined CSV with both GPS and IMU data
+            try:
+                combined_df = gps_df.merge(
+                    imu_df,
+                    left_on='time_us',
+                    right_on='time_us',
+                    how='outer'
+                ).sort_values('time_us')
+                csv_combined = combined_df.to_csv(index=False)
+                st.download_button(
+                    label="🔗 All Data (CSV)",
+                    data=csv_combined,
+                    file_name=f"{os.path.splitext(uploaded_file.name)[0]}_combined.csv",
+                    mime="text/csv",
+                    use_container_width=True
+                )
+            except Exception as e:
+                st.info("Combined export unavailable")
 
     except FileNotFoundError as e:
         st.error(f"[ERROR] File error: {e}")

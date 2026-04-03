@@ -176,6 +176,25 @@ class ArduPilotLogParser:
 
 
 # -------------------------------------------------
+# WRAPPER FUNCTION
+# -------------------------------------------------
+
+def parse_ardupilot_log(file_path):
+    """
+    Parse ArduPilot binary or text log file.
+    
+    Args:
+        file_path: Path to .BIN or .LOG file
+        
+    Returns:
+        tuple: (gps_df, imu_df) - GPS and IMU data as pandas DataFrames
+    """
+    parser = ArduPilotLogParser(file_path)
+    gps_df, imu_df, _, _, _, _ = parser.parse()
+    return gps_df, imu_df
+
+
+# -------------------------------------------------
 # RUN
 # -------------------------------------------------
 

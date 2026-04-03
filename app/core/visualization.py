@@ -481,3 +481,154 @@ def plot_3d_trajectory(df, color_mode="speed"):
     except Exception as e:
         logger.error(f"Error creating 3D visualization: {e}")
         raise
+
+
+def plot_flight_map(gps_df):
+    """
+    Create interactive Folium map showing flight path on Earth.
+    
+    Args:
+        gps_df: DataFrame with columns 'lat', 'lon', 'alt' (and optionally 'speed')
+        
+    Returns:
+        folium.Map object
+        
+    Raises:
+        ImportError: If folium not installed
+        ValueError: If required columns missing
+    """
+    try:
+        import folium
+        from folium import plugins
+    except ImportError:
+        logger.error("Folium not installed. Run: pip install folium")
+        raise ImportError("Folium required for interactive maps. Install with: pip install folium")
+    
+    if gps_df.empty or 'lat' not in gps_df.columns or 'lon' not in gps_df.columns:
+        raise ValueError("GPS data requires 'lat' and 'lon' columns")
+    
+    try:
+        # Calculate center point
+        center_lat = gps_df['lat'].mean()
+        center_lon = gps_df['lon'].mean()
+        
+        # Create base map
+        map_flight = folium.Map(
+            location=[center_lat, center_lon],
+            zoom_start=16,
+            tiles='OpenStreetMap'
+        )
+        
+        # === ADD FLIGHT PATH ===
+        path_coords = [[row['lat'], row['lon']] for idx, row in gps_df.iterrows()]
+        
+        folium.PolyLine(
+            path_coords,
+            color='blue',
+            weight=2.5,
+            opacity=0.7,
+            popup='Flight Path'
+        ).add_to(map_flight)
+        
+        # === START POINT ===
+        start_lat, start_lon = gps_df['lat'].iloc[0], gps_df['lon'].iloc[0]
+        start_alt = gps_df['alt'].iloc[0]
+        
+        folium.Marker(
+            location=[start_lat, start_lon],
+            popup=f"<b>START</b><br>Altitude: {start_alt:.1f} m",
+            tooltip='🚀 START',
+            icon=folium.Icon(color='green', icon='play', prefix='fa'),
+            zoom_on_click=True
+        ).add_to(map_flight)
+        
+        # === LANDING POINT ===
+        end_lat, end_lon = gps_df['lat'].iloc[-1], gps_df['lon'].iloc[-1]
+        end_alt = gps_df['alt'].iloc[-1]
+        
+        folium.Marker(
+            location=[end_lat, end_lon],
+            popup=f"<b>LANDING</b><br>Altitude: {end_alt:.1f} m",
+            tooltip='LAND',
+            icon=folium.Icon(color='red', icon='stop', prefix='fa'),
+            zoom_on_click=True
+        ).add_to(map_flight)
+        
+        # === MAX ALTITUDE POINT ===
+        if 'alt' in gps_df.columns:
+            max_alt_idx = gps_df['alt'].idxmax()
+            max_alt = gps_df['alt'].iloc[max_alt_idx]
+            max_alt_lat = gps_df['lat'].iloc[max_alt_idx]
+            max_alt_lon = gps_df['lon'].iloc[max_alt_idx]
+            
+            folium.Marker(
+                location=[max_alt_lat, max_alt_lon],
+                popup=f"<b>MAX ALTITUDE</b><br>{max_alt:.1f} m",
+                tooltip=f'⬆ {max_alt:.1f} m',
+                icon=folium.Icon(color='orange', icon='arrow-up', prefix='fa'),
+                zoom_on_click=True
+            ).add_to(map_flight)
+        
+        # === ADD SPEED INDICATORS (if available) ===
+        if 'speed' in gps_df.columns:
+            # Add circles for each point (size = speed)
+            for idx, row in gps_df.iterrows():
+                if idx % max(1, len(gps_df) // 50) == 0:  # Sample every 2% points
+                    speed = row['speed'] if row['speed'] > 0 else 0.1
+                    
+                    folium.CircleMarker(
+                        location=[row['lat'], row['lon']],
+                        radius=max(2, min(8, speed / 2)),  # Scale: min 2px, max 8px
+                        popup=f"Speed: {speed:.2f} m/s<br>Alt: {row['alt']:.1f} m",
+                        tooltip=f"{speed:.2f} m/s",
+                        color='blue',
+                        fill=True,
+                        fillColor='cyan',
+                        fillOpacity=0.4,
+                        weight=1
+                    ).add_to(map_flight)
+        
+        # === ADD DISTANCE MEASUREMENT ===
+        total_distance = 0
+        for i in range(len(gps_df) - 1):
+            lat1, lon1 = gps_df['lat'].iloc[i], gps_df['lon'].iloc[i]
+            lat2, lon2 = gps_df['lat'].iloc[i + 1], gps_df['lon'].iloc[i + 1]
+            
+            # Haversine formula
+            from math import radians, cos, sin, asin, sqrt
+            lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+            dlon = lon2 - lon1
+            dlat = lat2 - lat1
+            a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+            c = 2 * asin(sqrt(a))
+            r = 6371  # Earth radius in km
+            total_distance += c * r
+        
+        # Add info box
+        info_text = f"""
+        <div style="font-family: Arial; font-size: 14px; background: white; padding: 10px; border-radius: 5px; box-shadow: 0 0 15px rgba(0,0,0,0.2);">
+            <b>Flight Statistics</b><br>
+            Start: {start_lat:.6f}, {start_lon:.6f}<br>
+            End: {end_lat:.6f}, {end_lon:.6f}<br>
+            Distance: {total_distance:.2f} km<br>
+            Points: {len(gps_df)}
+        </div>
+        """
+        
+        map_flight.get_root().html.add_child(
+            folium.Element(f'<div style="position: fixed; bottom: 50px; right: 10px; width: 250px; z-index: 9999;">{info_text}</div>')
+        )
+        
+        # Add fullscreen button
+        plugins.Fullscreen().add_to(map_flight)
+        
+        # Add layer control
+        folium.LayerControl().add_to(map_flight)
+        
+        logger.info(f"Flight map created with {len(gps_df)} GPS points")
+        
+        return map_flight
+    
+    except Exception as e:
+        logger.error(f"Error creating flight map: {e}")
+        raise
