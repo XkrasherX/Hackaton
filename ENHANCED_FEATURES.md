@@ -2,7 +2,7 @@
 
 ## New in Latest Release
 
-### 1. 🤖 AI-Powered Flight Analysis
+### 1. AI-Powered Flight Analysis
 
 #### Overview
 The analyzer now includes LLM-based insights using **Groq API** (free tier available).
@@ -73,7 +73,7 @@ If API key unavailable, system uses rule-based analysis:
 - Altitude change patterns
 - Duration-based assessments
 
-### 2. 📚 Mathematical Theory Module
+### 2. Mathematical Theory Module
 
 #### Location
 `app/core/theory.py` - Comprehensive mathematical documentation
@@ -121,7 +121,7 @@ q_combined = quaternion_multiply(q1, q2)
 roll2, pitch2, yaw2 = euler_from_quaternion(*q)
 ```
 
-### 3. 🎨 Enhanced Dashboard (Streamlit)
+### 3. Enhanced Dashboard (Streamlit)
 
 #### New Features
 
@@ -152,29 +152,29 @@ roll2, pitch2, yaw2 = euler_from_quaternion(*q)
 
 ```
 ┌─────────────────────────────────────────────────┐
-│ 🚀 ArduPilot Flight Log Analyzer                │
+│  ArduPilot Flight Log Analyzer                  │
 ├─────────────────────────────────────────────────┤
 │ Sidebar (About, Options) | Main Content         │
 ├─────────────────────────────────────────────────┤
-│ 📤 File Upload                                  │
+│  File Upload                                    │
 │                                                 │
-│ 📊 Flight Metrics Dashboard (3 columns)         │
+│  Flight Metrics Dashboard (3 columns)           │
 │                                                 │
-│ 🏔️ Altitude Profile (Chart)                    │
+│  Altitude Profile (Chart)                       │
 │                                                 │
-│ 💨 Speed Profile (Chart)                       │
+│  Speed Profile (Chart)                          │
 │                                                 │
-│ 🧭 3D Trajectory (Plotly)                      │
+│  3D Trajectory (Plotly)                         │
 │                                                 │
-│ 🤖 AI Analysis (Summary/Anomalies/Recs)        │
+│  AI Analysis (Summary/Anomalies/Recs)           │
 │                                                 │
-│ 📈 Advanced Statistics (Expandable)             │
+│  Advanced Statistics (Expandable)               │
 │                                                 │
-│ 📥 Data Export (Download buttons)               │
+│  Data Export (Download buttons)                 │
 └─────────────────────────────────────────────────┘
 ```
 
-### 4. ✨ Extended Utilities
+### 4.  Extended Utilities
 
 #### New in utils.py
 ```python
@@ -306,26 +306,3 @@ Planned additions:
 - [ ] Real-time telemetry streaming
 - [ ] Machine learning anomaly detection
 
-## Changelog
-
-### v1.1.0 (Latest)
-- Added AI flight analysis with Groq API
-- Added mathematical theory module
-- Enhanced Streamlit dashboard
-- Added quaternion support
-- Improved error handling and logging
-- Extended documentation
-
-### v1.0.0
-- Initial release
-- Core metrics computation
-- 3D visualization
-- Basic utilities
-
-## Support
-
-For issues, questions, or suggestions:
-- Check documentation in `/theory.py`
-- Review example code in `/example.py`
-- Check logs in Streamlit console
-- File issues on GitHub
