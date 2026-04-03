@@ -62,17 +62,22 @@ class ArduPilotLogParser:
         alt = getattr(msg, "Alt", None)
         spd = getattr(msg, "Spd", getattr(msg, "Vel", None))
         
-        # Values from ArduPilot GPS messages are already in proper units:
-        # - Lat/Lng: decimal degrees
+        # ArduPilot BIN log format stores speed in cm/s, need to convert to m/s
+        # Some GPS messages may have Spd in different units, so normalize to m/s
+        if spd is not None and spd > 1000:  # If speed > 1000 m/s, likely in cm/s
+            spd = spd / 100.0  # Convert cm/s to m/s
+        
+        # Values from ArduPilot GPS messages:
+        # - Lat/Lng: decimal degrees (already converted by pymavlink)
         # - Alt: meters
-        # - Spd: m/s
+        # - Spd: m/s (converted from cm/s if needed)
         
         self.gps_data.append({
             "TimeUS": getattr(msg, "TimeUS", None),
             "Lat_deg": lat,  # Already in degrees
             "Lon_deg": lng,  # Already in degrees
             "Alt_m": alt,    # Already in meters
-            "Vel_m_s": spd,  # Already in m/s
+            "Vel_m_s": spd,  # Convert to m/s if needed
             "Satellites": getattr(msg, "NSats", getattr(msg, "Nsat", None)),
         })
 

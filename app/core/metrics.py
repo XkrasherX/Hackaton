@@ -86,6 +86,32 @@ def compute_speed_components(gps_df):
 
     horizontal_speed = np.array(horizontal_dist) / dt.values
     
+    # Fix unrealistic speed values (likely GPS errors at start/end)
+    # Max drone speed is typically ~100 m/s (360 km/h)
+    # Filter out outliers using median absolute deviation
+    valid_speeds = horizontal_speed[horizontal_speed < 200]  # Initial filter
+    if len(valid_speeds) > 0:
+        median_speed = np.median(valid_speeds)
+        mad = np.median(np.abs(valid_speeds - median_speed))
+        threshold = median_speed + 5 * mad if mad > 0 else 100
+    else:
+        threshold = 100
+    
+    # Replace extreme values with NaN (will be interpolated)
+    horizontal_speed = np.where(horizontal_speed > threshold, np.nan, horizontal_speed)
+    
+    # Interpolate NaN values
+    valid_mask = ~np.isnan(horizontal_speed)
+    if valid_mask.sum() > 0:
+        valid_indices = np.where(valid_mask)[0]
+        horizontal_speed = np.interp(
+            np.arange(len(horizontal_speed)),
+            valid_indices,
+            horizontal_speed[valid_indices],
+            left=0,
+            right=horizontal_speed[valid_indices[-1]] if len(valid_indices) > 0 else 0
+        )
+    
     # Handle missing altitude values
     if "alt" in gps_df.columns:
         vertical_speed = gps_df["alt"].diff() / dt.values

@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d93026b8-b135-4f92-8c81-8c9c84930ed8" name="Changes" comment="deleted unnecessary files and changed font for text in 3d view">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/core/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/app.py" afterDir="false" />
-    </list>
+    <list default="true" id="d93026b8-b135-4f92-8c81-8c9c84930ed8" name="Changes" comment="Added usefully links to github and readme" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -167,7 +164,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775123736351</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Added usefully links to github and readme">
+      <option name="closed" value="true" />
+      <created>1775212514729</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1775212514729</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -203,6 +208,7 @@
     <MESSAGE value="changed parser.py and app.py so now we can read data from a bin files and visualise it in 3d model" />
     <MESSAGE value="changed parser.py for reading all types of bin-data" />
     <MESSAGE value="deleted unnecessary files and changed font for text in 3d view" />
-    <option name="LAST_COMMIT_MESSAGE" value="deleted unnecessary files and changed font for text in 3d view" />
+    <MESSAGE value="Added usefully links to github and readme" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added usefully links to github and readme" />
   </component>
 </project>

@@ -4,6 +4,7 @@ import numpy as np
 import tempfile
 import os
 import logging
+import plotly.graph_objects as go
 
 from parser import parse_ardupilot_log, ArduPilotLogParser
 from coordinates import wgs84_to_ecef, ecef_to_enu
@@ -305,35 +306,63 @@ if uploaded_file is not None:
         # === ALTITUDE & SPEED PROFILES ===
         
         with st.expander("🏔️ Altitude Profile Over Time", expanded=False):
-            st.markdown("""
-            **📊 What this graph shows:**
-            - X-axis: Time elapsed from flight start (seconds)
-            - Y-axis: Altitude above reference point (meters)
-            - Shows climb and descent patterns
-            - Sharp angles indicate rapid altitude changes
-            """)
-            
             alt_data = pd.DataFrame({
                 'Time (s)': (gps_df['time_us'] - gps_df['time_us'].iloc[0]) / 1e6,
                 'Altitude (m)': gps_df['alt']
             })
-            st.line_chart(alt_data.set_index('Time (s)'), use_container_width=True)
+            
+            fig_alt = go.Figure()
+            fig_alt.add_trace(go.Scatter(
+                x=alt_data['Time (s)'],
+                y=alt_data['Altitude (m)'],
+                mode='lines',
+                name='Altitude',
+                line=dict(color='#1f77b4', width=2),
+                showlegend=True
+            ))
+            fig_alt.update_layout(
+                title="Altitude Profile Over Time",
+                xaxis_title="Time (s)",
+                yaxis_title="Altitude (m)",
+                hovermode='x unified',
+                dragmode=False,
+                width=None,
+                height=400
+            )
+            st.plotly_chart(fig_alt, use_container_width=True)
 
         with st.expander("💨 Speed Profile Over Time", expanded=False):
-            st.markdown("""
-            **📊 What this graph shows:**
-            - X-axis: Time elapsed from flight start (seconds)
-            - Y-axis (Blue): Horizontal speed across ground (m/s)
-            - Y-axis (Orange): Vertical speed up/down (m/s)
-            - Helps identify acceleration and maneuver patterns
-            """)
-            
             speed_data = pd.DataFrame({
                 'Time (s)': (gps_df['time_us'] - gps_df['time_us'].iloc[0]) / 1e6,
                 'Horiz. Speed (m/s)': horizontal_speed,
                 'Vert. Speed (m/s)': vertical_speed
             })
-            st.line_chart(speed_data.set_index('Time (s)'), use_container_width=True)
+            
+            fig_speed = go.Figure()
+            fig_speed.add_trace(go.Scatter(
+                x=speed_data['Time (s)'],
+                y=speed_data['Horiz. Speed (m/s)'],
+                mode='lines',
+                name='Horiz. Speed',
+                line=dict(color='#1f77b4', width=2)
+            ))
+            fig_speed.add_trace(go.Scatter(
+                x=speed_data['Time (s)'],
+                y=speed_data['Vert. Speed (m/s)'],
+                mode='lines',
+                name='Vert. Speed',
+                line=dict(color='#ff7f0e', width=2, dash='dash')
+            ))
+            fig_speed.update_layout(
+                title="Speed Profile Over Time",
+                xaxis_title="Time (s)",
+                yaxis_title="Speed (m/s)",
+                hovermode='x unified',
+                dragmode=False,
+                width=None,
+                height=400
+            )
+            st.plotly_chart(fig_speed, use_container_width=True)
 
         # === VISUALIZATION TABS ===
 
