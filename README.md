@@ -516,7 +516,7 @@ fig = plot_3d_trajectory(gps_df, color_mode="speed")  # or "time"
 fig.show()
 ```
 
-### theory.py (NEW!)
+### theory.py
 Mathematical foundations of all algorithms and transformations
 
 ```python
@@ -537,7 +537,7 @@ bias = theory.estimate_bias_from_data(imu_data)
 - Numerical and analytical integration methods
 - Comprehensive formula documentation (400+ lines of docstrings)
 
-### ai_analysis.py (NEW!)
+### ai_analysis.py
 LLM integration for automatic anomaly detection and recommendations
 
 ```python
@@ -582,14 +582,14 @@ from core import (
     create_summary_report
 )
 
-# 1. Парсинг логу
+# 1. Log parsing
 gps_df, imu_df = parse_ardupilot_log("data/00000001.BIN")
 
-# 2. Обчислення метрик
+# 2. Calculating metrics
 total_dist = compute_total_distance_haversine(gps_df)
 h_speed, v_speed = compute_speed_components(gps_df)
 
-# 3. Конвертація координат
+# 3. Coordinate conversion
 x, y, z = wgs84_to_ecef(gps_df['lat'], gps_df['lon'], gps_df['alt'])
 east, north, up = ecef_to_enu(x, y, z, 
                               gps_df['lat'].iloc[0],
@@ -600,12 +600,12 @@ gps_df['east'] = east
 gps_df['north'] = north
 gps_df['up'] = up
 
-# 4. Візуалізація
+# 4. Visualization
 fig = plot_3d_trajectory(gps_df, color_mode="speed")
 fig.show()
 ```
 
-### AI-аналіз польоту
+### AI flight analysis
 
 ```python
 from core import (
@@ -619,10 +619,10 @@ from core import (
     format_analysis_for_display
 )
 
-# 1. Парсинг логу
+# 1. Log parsing
 gps_df, imu_df = parse_ardupilot_log("data/00000001.BIN")
 
-# 2. Обчислення метрик для передачі AI
+# 2. Calculating metrics for AI transfer
 metrics = {
     'total_distance': compute_total_distance_haversine(gps_df),
     'max_h_speed': compute_speed_components(gps_df)[0],
@@ -632,7 +632,7 @@ metrics = {
     'duration': compute_duration(gps_df)
 }
 
-# 3. AI аналіз (з резервним падінням на правила, якщо API недоступна)
+# 3. AI analysis (with a fallback to rules if the API is unavailable)
 analysis = analyze_flight_with_ai(
     metrics,
     gps_df,
