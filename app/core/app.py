@@ -101,16 +101,16 @@ with st.sidebar:
     
     st.markdown("---")
     st.header("🔗 Links")
-    
-    st.markdown("[📘 Documentation](https://github.com/Nestors1234/ArduPilot-Flight-Log-Analyzer)")
-    st.markdown("[⭐ GitHub](https://github.com/Nestors1234/ArduPilot-Flight-Log-Analyzer)")
-    st.markdown("[💬 Support](https://github.com/Nestors1234/ArduPilot-Flight-Log-Analyzer/issues)")
+
+    st.markdown("[GitHub](https://github.com/XkrasherX/Hackaton.git)")
+    st.markdown("[Documentation](https://github.com/XkrasherX/Hackaton/blob/master/README.md)")
+    st.markdown("[Support](https://github.com/Nestors1234/ArduPilot-Flight-Log-Analyzer/issues)")
     
     st.markdown("---")
     st.markdown("""
-    <small>🚀 **ArduPilot Flight Log Analyzer**  
+    <small> **ArduPilot Flight Log Analyzer**  
     Advanced analysis tool for drone flight logs  
-    Version 2.1 | April 2026</small>
+    Version 0.4 | April 2026</small>
     """, unsafe_allow_html=True)
 
 st.markdown("""
@@ -139,7 +139,7 @@ if uploaded_file is not None:
         progress_bar = st.progress(0)
         status_text = st.empty()
         
-        status_text.text("🔍 Parsing log file...")
+        status_text.text("Parsing log file...")
         progress_bar.progress(10)
         
         parser = ArduPilotLogParser(tmp_path)
@@ -200,7 +200,7 @@ if uploaded_file is not None:
         logger.info(f"Parsed {len(gps_df)} GPS records and {len(imu_df)} IMU records")
         
         progress_bar.progress(30)
-        status_text.text("📊 Computing metrics...")
+        status_text.text("Computing metrics...")
 
         # === CALCULATIONS ===
         
@@ -217,7 +217,7 @@ if uploaded_file is not None:
         duration = compute_duration(gps_df)
         
         progress_bar.progress(50)
-        status_text.text("🌍 Converting coordinates...")
+        status_text.text("Converting coordinates...")
 
         # Convert to ENU coordinate system
         x, y, z = wgs84_to_ecef(
@@ -252,7 +252,7 @@ if uploaded_file is not None:
         }
         
         progress_bar.progress(100)
-        status_text.text("✅ Analysis complete!")
+        status_text.text("Analysis complete!")
         
         # Clear progress indicators
         import time
@@ -552,6 +552,6 @@ if uploaded_file is not None:
 # Footer
 st.markdown("---")
 st.markdown("""
-**ArduPilot Flight Log Analyzer** | Powered by Python, Streamlit, and AI  
-[GitHub](https://github.com) • [Documentation](https://github.com) • [Support](https://github.com)
+**ArduPilot Flight Log Analyzer** |  
+[GitHub](https://github.com/XkrasherX/Hackaton.git) • [Documentation](https://github.com/XkrasherX/Hackaton/blob/master/README.md) • [Support](https://github.com)
 """)
