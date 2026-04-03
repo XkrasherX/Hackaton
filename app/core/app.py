@@ -35,21 +35,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- THEME STATE ---
-if "theme_mode" not in st.session_state:
-    st.session_state.theme_mode = "dark"
-
-
-def toggle_theme():
-    """Toggle between light and dark theme"""
-    if st.session_state.theme_mode == "light":
-        st.session_state.theme_mode = "dark"
-    else:
-        st.session_state.theme_mode = "light"
-
-
-# --- THEME STATE (CSS REMOVED) ---
-theme = st.session_state.theme_mode
+# Theme config is now in .streamlit/config.toml
 
 st.markdown("""
 <h1 style='text-align: center;'>🚀 ArduPilot Flight Log Analyzer</h1>
@@ -78,14 +64,6 @@ with st.sidebar:
     
     st.markdown("---")
     st.header("⚙️ Options")
-    
-    # Theme Toggle Button
-    st.subheader("🎨 Theme")
-    theme_label = "🌙 Dark Mode" if st.session_state.theme_mode == "light" else "☀️ Light Mode"
-    if st.button(theme_label):
-        toggle_theme()
-        st.rerun()
-    
     st.markdown("---")
     
     enable_ai = st.checkbox(

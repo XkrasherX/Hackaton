@@ -34,11 +34,11 @@ def plot_2d_top_view(df, color_mode="speed"):
             x=df["east"],
             y=df["north"],
             mode='lines',
+            name="Flight Path",
             line=dict(
                 width=3,
                 color='rgba(100, 150, 200, 0.6)'
             ),
-            name="Flight Path",
             hovertemplate="<b>Position</b><br>East: %{x:.1f} m<br>North: %{y:.1f} m<extra></extra>",
             showlegend=False
         ))
@@ -73,7 +73,7 @@ def plot_2d_top_view(df, color_mode="speed"):
             marker=dict(size=15, color='#00CC00', symbol='diamond', line=dict(color='darkgreen', width=2)),
             text=['START'],
             textposition="top center",
-            textfont=dict(size=11, color='darkgreen', family='Arial Black'),
+            textfont=dict(size=11, color='#00CC00', family='Arial Black'),
             name='Start',
             hovertemplate="<b>START</b><extra></extra>",
             showlegend=True
@@ -108,13 +108,13 @@ def plot_2d_top_view(df, color_mode="speed"):
                 title="<b>East (m)</b>",
                 showgrid=True,
                 gridwidth=1,
-                gridcolor='rgba(200, 200, 200, 0.3)'
+                gridcolor='rgba(100, 100, 100, 0.3)'
             ),
             yaxis=dict(
                 title="<b>North (m)</b>",
                 showgrid=True,
                 gridwidth=1,
-                gridcolor='rgba(200, 200, 200, 0.3)'
+                gridcolor='rgba(100, 100, 100, 0.3)'
             ),
             width=800,
             height=700,
@@ -122,13 +122,14 @@ def plot_2d_top_view(df, color_mode="speed"):
             legend=dict(
                 x=0.01,
                 y=0.99,
-                bgcolor='rgba(255, 255, 255, 0.9)',
+                bgcolor='rgba(30, 30, 30, 0.9)',
                 bordercolor='gray',
                 borderwidth=1
             ),
-            plot_bgcolor='rgba(240, 240, 245, 0.5)',
-            paper_bgcolor='white',
-            hovermode='closest'
+            plot_bgcolor='rgba(20, 20, 30, 0.8)',
+            paper_bgcolor='rgba(15, 23, 42, 0.95)',
+            hovermode='closest',
+            font=dict(color='#f1f5f9')
         )
         
         return fig
@@ -184,18 +185,18 @@ def plot_altitude_profile(df):
                 title="<b>Distance Along Path (m)</b>",
                 showgrid=True,
                 gridwidth=1,
-                gridcolor='rgba(200, 200, 200, 0.3)'
+                gridcolor='rgba(100, 100, 100, 0.3)'
             ),
             yaxis=dict(
-                title=dict(text="<b>Altitude (m)</b>", font=dict(color='#1f77b4')),
-                tickfont=dict(color='#1f77b4'),
+                title=dict(text="<b>Altitude (m)</b>", font=dict(color='#3b82f6')),
+                tickfont=dict(color='#3b82f6'),
                 showgrid=True,
                 gridwidth=1,
-                gridcolor='rgba(200, 200, 200, 0.3)'
+                gridcolor='rgba(100, 100, 100, 0.3)'
             ),
             yaxis2=dict(
-                title=dict(text="<b>Speed (m/s)</b>", font=dict(color='#ff7f0e')),
-                tickfont=dict(color='#ff7f0e'),
+                title=dict(text="<b>Speed (m/s)</b>", font=dict(color='#f59e0b')),
+                tickfont=dict(color='#f59e0b'),
                 anchor='free',
                 overlaying='y',
                 side='right',
@@ -207,13 +208,14 @@ def plot_altitude_profile(df):
             legend=dict(
                 x=0.01,
                 y=0.99,
-                bgcolor='rgba(255, 255, 255, 0.9)',
+                bgcolor='rgba(30, 30, 30, 0.9)',
                 bordercolor='gray',
                 borderwidth=1
             ),
-            plot_bgcolor='rgba(240, 240, 245, 0.5)',
-            paper_bgcolor='white',
-            hovermode='x unified'
+            plot_bgcolor='rgba(20, 20, 30, 0.8)',
+            paper_bgcolor='rgba(15, 23, 42, 0.95)',
+            hovermode='x unified',
+            font=dict(color='#f1f5f9')
         )
         
         return fig
@@ -298,12 +300,12 @@ def plot_3d_trajectory(df, color_mode="speed"):
             marker=dict(
                 size=8,
                 color='#00CC00',
-                line=dict(color='darkgreen', width=3),
+                line=dict(color='#00CC00', width=3),
                 opacity=0.9
             ),
             text=["START"],
             textposition="top center",
-            textfont=dict(size=12, color='black', family='Arial Black'),
+            textfont=dict(size=12, color='white', family='Arial Black'),
             name='Start Point',
             hovertemplate="<b>START</b><br>" +
                           "East: %{x:.1f} m<br>" +
@@ -327,7 +329,7 @@ def plot_3d_trajectory(df, color_mode="speed"):
             ),
             text=["LAND"],
             textposition="top center",
-            textfont=dict(size=12, color='black', family='Arial Black'),
+            textfont=dict(size=12, color='white', family='Arial Black'),
             name='Landing Point',
             hovertemplate="<b>LANDING</b><br>" +
                           "East: %{x:.1f} m<br>" +
@@ -415,7 +417,7 @@ def plot_3d_trajectory(df, color_mode="speed"):
                     title="<b>East (m)</b>",
                     showgrid=True,
                     gridwidth=1,
-                    gridcolor='rgba(200, 200, 200, 0.3)',
+                    gridcolor='rgba(100, 100, 100, 0.3)',
                     zeroline=True,
                     zerolinewidth=2,
                     zerolinecolor='rgba(100, 100, 100, 0.5)'
@@ -424,7 +426,7 @@ def plot_3d_trajectory(df, color_mode="speed"):
                     title="<b>North (m)</b>",
                     showgrid=True,
                     gridwidth=1,
-                    gridcolor='rgba(200, 200, 200, 0.3)',
+                    gridcolor='rgba(100, 100, 100, 0.3)',
                     zeroline=True,
                     zerolinewidth=2,
                     zerolinecolor='rgba(100, 100, 100, 0.5)'
@@ -433,15 +435,15 @@ def plot_3d_trajectory(df, color_mode="speed"):
                     title="<b>Altitude (m)</b>",
                     showgrid=True,
                     gridwidth=1,
-                    gridcolor='rgba(200, 200, 200, 0.3)',
+                    gridcolor='rgba(100, 100, 100, 0.3)',
                     zeroline=True,
                     zerolinewidth=2,
                     zerolinecolor='rgba(100, 100, 100, 0.5)'
                 ),
                 aspectmode='data',
-                bgcolor='rgba(245, 245, 250, 0.5)',
+                bgcolor='rgba(20, 20, 30, 0.8)',
                 camera=dict(
-                    eye=dict(x=1.5, y=1.5, z=1.3)  # Better default viewing angle
+                    eye=dict(x=1.5, y=1.5, z=1.3)
                 )
             ),
             width=1200,
@@ -450,16 +452,16 @@ def plot_3d_trajectory(df, color_mode="speed"):
             legend=dict(
                 x=0.01,
                 y=0.99,
-                bgcolor='rgba(255, 255, 255, 0.9)',
+                bgcolor='rgba(30, 30, 30, 0.9)',
                 bordercolor='rgba(100, 100, 100, 0.5)',
                 borderwidth=2,
                 font=dict(size=11),
                 tracegroupgap=10
             ),
             margin=dict(l=0, r=150, t=100, b=0),
-            font=dict(family='Arial, sans-serif', size=12, color='#333333'),
-            plot_bgcolor='rgba(240, 240, 245, 0.5)',
-            paper_bgcolor='white',
+            font=dict(family='Arial, sans-serif', size=12, color='#f1f5f9'),
+            plot_bgcolor='rgba(20, 20, 30, 0.8)',
+            paper_bgcolor='rgba(15, 23, 42, 0.95)',
             hovermode='closest'
         )
         
