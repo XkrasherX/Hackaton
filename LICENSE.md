@@ -2,7 +2,7 @@
 
 ## ArduPilot Flight Log Analyzer
 
-**Copyright © 2026 Team of Danylo Chemerys, Maksim Yakymovych, Nataliia Oleskiv **
+**Copyright © 2026 Team of Danylo Chemerys, Maksim Yakymovych, Nataliia Oleskiv**
 
 All rights reserved.
 
