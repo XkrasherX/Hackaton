@@ -28,6 +28,102 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# =====================================================
+# THEME CONFIGURATION
+# =====================================================
+
+THEMES = {
+    "Light": {
+        "primary": "#0066cc",
+        "background": "#ffffff",
+        "secondary": "#e8ecef",
+        "text": "#262730",
+        "card_bg": "#f0f2f6",
+    },
+    "Dark": {
+        "primary": "#0099ff",
+        "background": "#0e1117",
+        "secondary": "#1c2128",
+        "text": "#e6edf3",
+        "card_bg": "#1c2128",
+    },
+    "Ocean": {
+        "primary": "#0077be",
+        "background": "#f0f4f8",
+        "secondary": "#d4e8f7",
+        "text": "#001d3d",
+        "card_bg": "#e8f4f8",
+    },
+    "Forest": {
+        "primary": "#2d6a4f",
+        "background": "#f1faee",
+        "secondary": "#e8f5e9",
+        "text": "#1b4332",
+        "card_bg": "#d8f3dc",
+    },
+}
+
+def apply_theme_css(theme_name):
+    """Generate and apply dynamic CSS based on selected theme"""
+    theme = THEMES.get(theme_name, THEMES["Light"])
+    
+    css = f"""
+    <style>
+        :root {{
+            --primary-color: {theme['primary']};
+            --bg-color: {theme['background']};
+            --secondary-color: {theme['secondary']};
+            --text-color: {theme['text']};
+        }}
+        
+        .metric-card {{
+            background-color: {theme['card_bg']};
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid {theme['primary']};
+        }}
+        
+        .success-box {{
+            background-color: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }}
+        
+        .warning-box {{
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+        }}
+        
+        .danger-box {{
+            background-color: #f8d7da;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }}
+        
+        /* Dynamically styled elements */
+        .stMarkdown {{
+            color: {theme['text']};
+        }}
+        
+        h1, h2, h3, h4, h5, h6 {{
+            color: {theme['primary']};
+        }}
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)
+
+# Initialize session state for theme
+if "theme" not in st.session_state:
+    st.session_state.theme = "Light"
+
 # Page config
 st.set_page_config(
     page_title="ArduPilot Flight Analyzer",
@@ -35,35 +131,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
-st.markdown("""
-<style>
-    .metric-card {
-        background-color: #f0f2f6;
-        padding: 20px;
-        border-radius: 10px;
-        margin: 10px 0;
-    }
-    .success-box {
-        background-color: #d4edda;
-        padding: 15px;
-        border-radius: 5px;
-        border-left: 4px solid #28a745;
-    }
-    .warning-box {
-        background-color: #fff3cd;
-        padding: 15px;
-        border-radius: 5px;
-        border-left: 4px solid #ffc107;
-    }
-    .danger-box {
-        background-color: #f8d7da;
-        padding: 15px;
-        border-radius: 5px;
-        border-left: 4px solid #dc3545;
-    }
-</style>
-""", unsafe_allow_html=True)
+# Apply selected theme
+apply_theme_css(st.session_state.theme)
 
 st.title("🚀 ArduPilot Flight Log Analyzer")
 
@@ -87,6 +156,18 @@ with st.sidebar:
     
     st.markdown("---")
     st.header("⚙️ Options")
+    
+    # Theme selector
+    selected_theme = st.selectbox(
+        "🎨 Select Theme",
+        list(THEMES.keys()),
+        index=list(THEMES.keys()).index(st.session_state.theme),
+        help="Choose a color theme for the entire application"
+    )
+    
+    if selected_theme != st.session_state.theme:
+        st.session_state.theme = selected_theme
+        st.rerun()
     
     enable_ai = st.checkbox(
         "Enable AI Analysis",

@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 from pymavlink import mavutil
-from collections import defaultdict
 
 
 class ArduPilotLogParser:
@@ -15,14 +14,14 @@ class ArduPilotLogParser:
         self.att_data = []
         self.pid_data = []
 
-    # -------------------------------------------------
-    # MAIN PARSER
-    # -------------------------------------------------
+    # =====================================================
+    # MAIN
+    # =====================================================
 
     def parse(self):
         print("[*] Parsing log...")
 
-        msg_types_found = {}
+        msg_counter = {}
 
         while True:
             msg = self.log.recv_match(blocking=False)
@@ -30,7 +29,7 @@ class ArduPilotLogParser:
                 break
 
             msg_type = msg.get_type()
-            msg_types_found[msg_type] = msg_types_found.get(msg_type, 0) + 1
+            msg_counter[msg_type] = msg_counter.get(msg_type, 0) + 1
 
             if msg_type in ["GPS", "GPS_RAW_INT", "GPS2_RAW"]:
                 self._parse_gps(msg)
@@ -39,55 +38,78 @@ class ArduPilotLogParser:
                 self._parse_imu(msg)
 
             elif msg_type in ["ATT", "ATTITUDE"]:
-                self._parse_attitude(msg)
+                self._parse_att(msg)
 
             elif "PID" in msg_type or msg_type in ["RATE", "ATC"]:
                 self._parse_pid(msg)
 
         print("[OK] Parsing complete")
-        print(f"   Message types found: {sorted(msg_types_found.items())}")
-        print(f"   GPS records: {len(self.gps_data)}, IMU records: {len(self.imu_data)}")
+        print("   Message types:", sorted(msg_counter.items()))
 
         return self._build_output()
 
-    # -------------------------------------------------
+    # =====================================================
+    # SAFE TIME EXTRACTION
+    # =====================================================
+
+    def _extract_time_us(self, msg):
+        if hasattr(msg, "TimeUS") and msg.TimeUS is not None:
+            return msg.TimeUS
+
+        if hasattr(msg, "TimeMS") and msg.TimeMS is not None:
+            return msg.TimeMS * 1000
+
+        if hasattr(msg, "Time") and msg.Time is not None:
+            return msg.Time * 1000
+
+        return None
+
+    # =====================================================
     # GPS
-    # -------------------------------------------------
+    # =====================================================
 
     def _parse_gps(self, msg):
-        # Handle both old and new field naming conventions
-        # Note: ArduPilot uses "Lng" not "Lon" for longitude
+        msg_type = msg.get_type()
+        t = self._extract_time_us(msg)
+
         lat = getattr(msg, "Lat", None)
-        lng = getattr(msg, "Lng", getattr(msg, "Lon", None))  # Try Lng first, then Lon
+        lon = getattr(msg, "Lng", getattr(msg, "Lon", None))
         alt = getattr(msg, "Alt", None)
         spd = getattr(msg, "Spd", getattr(msg, "Vel", None))
+
+        # GPS_RAW_INT scaling
+        if msg_type == "GPS_RAW_INT":
+            if lat is not None:
+                lat /= 1e7
+            if lon is not None:
+                lon /= 1e7
+            if alt is not None:
+                alt /= 1000
+            if spd is not None:
+                spd /= 100
         
-        # ArduPilot BIN log format stores speed in cm/s, need to convert to m/s
-        # Some GPS messages may have Spd in different units, so normalize to m/s
+        # Handle regular GPS messages - speed might be in cm/s
         if spd is not None and spd > 1000:  # If speed > 1000 m/s, likely in cm/s
             spd = spd / 100.0  # Convert cm/s to m/s
-        
-        # Values from ArduPilot GPS messages:
-        # - Lat/Lng: decimal degrees (already converted by pymavlink)
-        # - Alt: meters
-        # - Spd: m/s (converted from cm/s if needed)
-        
+
         self.gps_data.append({
-            "TimeUS": getattr(msg, "TimeUS", None),
-            "Lat_deg": lat,  # Already in degrees
-            "Lon_deg": lng,  # Already in degrees
-            "Alt_m": alt,    # Already in meters
-            "Vel_m_s": spd,  # Convert to m/s if needed
-            "Satellites": getattr(msg, "NSats", getattr(msg, "Nsat", None)),
+            "TimeUS": t,
+            "Lat_deg": lat,
+            "Lon_deg": lon,
+            "Alt_m": alt,
+            "Vel_m_s": spd,
+            "Satellites": getattr(msg, "NSats", getattr(msg, "Nsat", None))
         })
 
-    # -------------------------------------------------
+    # =====================================================
     # IMU
-    # -------------------------------------------------
+    # =====================================================
 
     def _parse_imu(self, msg):
+        t = self._extract_time_us(msg)
+
         self.imu_data.append({
-            "TimeUS": getattr(msg, "TimeUS", None),
+            "TimeUS": t,
             "AccX": getattr(msg, "AccX", getattr(msg, "xacc", None)),
             "AccY": getattr(msg, "AccY", getattr(msg, "yacc", None)),
             "AccZ": getattr(msg, "AccZ", getattr(msg, "zacc", None)),
@@ -96,28 +118,42 @@ class ArduPilotLogParser:
             "GyrZ": getattr(msg, "GyrZ", getattr(msg, "zgyro", None)),
         })
 
-    # -------------------------------------------------
+    # =====================================================
     # ATTITUDE
-    # -------------------------------------------------
+    # =====================================================
 
-    def _parse_attitude(self, msg):
+    def _parse_att(self, msg):
+        msg_type = msg.get_type()
+        t = self._extract_time_us(msg)
+
+        if msg_type == "ATTITUDE":
+            roll = np.degrees(getattr(msg, "roll", 0))
+            pitch = np.degrees(getattr(msg, "pitch", 0))
+            yaw = np.degrees(getattr(msg, "yaw", 0))
+        else:
+            roll = getattr(msg, "Roll", None)
+            pitch = getattr(msg, "Pitch", None)
+            yaw = getattr(msg, "Yaw", None)
+
         self.att_data.append({
-            "TimeUS": getattr(msg, "TimeUS", None),
-            "Roll_deg": np.degrees(getattr(msg, "Roll", getattr(msg, "roll", 0))),
-            "Pitch_deg": np.degrees(getattr(msg, "Pitch", getattr(msg, "pitch", 0))),
-            "Yaw_deg": np.degrees(getattr(msg, "Yaw", getattr(msg, "yaw", 0))),
+            "TimeUS": t,
+            "Roll_deg": roll,
+            "Pitch_deg": pitch,
+            "Yaw_deg": yaw,
             "DesRoll_deg": getattr(msg, "DesRoll", None),
             "DesPitch_deg": getattr(msg, "DesPitch", None),
             "DesYaw_deg": getattr(msg, "DesYaw", None),
         })
 
-    # -------------------------------------------------
+    # =====================================================
     # PID
-    # -------------------------------------------------
+    # =====================================================
 
     def _parse_pid(self, msg):
+        t = self._extract_time_us(msg)
+
         self.pid_data.append({
-            "TimeUS": getattr(msg, "TimeUS", None),
+            "TimeUS": t,
             "Tar": getattr(msg, "Tar", None),
             "Act": getattr(msg, "Act", None),
             "Err": getattr(msg, "Err", None),
@@ -131,20 +167,29 @@ class ArduPilotLogParser:
             "Flags": getattr(msg, "Flags", None),
         })
 
-    # -------------------------------------------------
+    # =====================================================
     # BUILD OUTPUT
-    # -------------------------------------------------
+    # =====================================================
 
     def _build_output(self):
+
         gps_df = pd.DataFrame(self.gps_data)
         imu_df = pd.DataFrame(self.imu_data)
         att_df = pd.DataFrame(self.att_data)
         pid_df = pd.DataFrame(self.pid_data)
 
-        # Normalize time (µs → seconds from start)
         for df in [gps_df, imu_df, att_df, pid_df]:
             if not df.empty and "TimeUS" in df:
-                df["Time_sec"] = (df["TimeUS"] - df["TimeUS"].iloc[0]) / 1e6
+                df = df.sort_values("TimeUS")
+                valid_time = df["TimeUS"].dropna()
+
+                if not valid_time.empty:
+                    t0 = valid_time.min()
+                    df["Time_sec"] = (df["TimeUS"] - t0) / 1e6
+
+                    # Detect time reset
+                    if np.any(np.diff(valid_time.values) < 0):
+                        print("⚠ Warning: Time reset detected in log")
 
         sampling_info = {
             "GPS_Hz": self._estimate_freq(gps_df),
@@ -154,67 +199,61 @@ class ArduPilotLogParser:
         }
 
         meta_info = {
-            "GPS": "Lat/Lon: degrees, Alt: meters",
-            "IMU": "Acceleration: raw or m/s^2, Gyro: rad/s",
+            "GPS": "Lat/Lon: degrees, Alt: meters, Speed: m/s",
+            "IMU": "Acceleration: raw, Gyro: raw",
             "ATT": "Angles: degrees",
             "PID": "Controller internal units"
         }
 
         return gps_df, imu_df, att_df, pid_df, sampling_info, meta_info
 
-    # -------------------------------------------------
-    # FREQUENCY ESTIMATION
-    # -------------------------------------------------
+    # =====================================================
+    # FREQUENCY (ROBUST)
+    # =====================================================
 
     def _estimate_freq(self, df):
         if df.empty or "TimeUS" not in df:
             return 0
 
         times = df["TimeUS"].dropna().values
-        if len(times) < 2:
+        if len(times) < 3:
             return 0
 
         dt = np.diff(times) / 1e6
-        mean_dt = np.mean(dt)
+        dt = dt[dt > 0]
 
-        return 1.0 / mean_dt if mean_dt > 0 else 0
+        if len(dt) == 0:
+            return 0
+
+        median_dt = np.median(dt)
+        return 1.0 / median_dt
 
 
-# -------------------------------------------------
-# WRAPPER FUNCTION
-# -------------------------------------------------
+# =====================================================
+# WRAPPER
+# =====================================================
 
 def parse_ardupilot_log(file_path):
-    """
-    Parse ArduPilot binary or text log file.
-    
-    Args:
-        file_path: Path to .BIN or .LOG file
-        
-    Returns:
-        tuple: (gps_df, imu_df) - GPS and IMU data as pandas DataFrames
-    """
     parser = ArduPilotLogParser(file_path)
-    gps_df, imu_df, _, _, _, _ = parser.parse()
-    return gps_df, imu_df
+    return parser.parse()
 
 
-# -------------------------------------------------
+# =====================================================
 # RUN
-# -------------------------------------------------
+# =====================================================
 
 if __name__ == "__main__":
 
-    parser = ArduPilotLogParser("flight_log.BIN")
+    gps_df, imu_df, att_df, pid_df, sampling_info, meta_info = parse_ardupilot_log("flight_log.BIN")
 
-    gps_df, imu_df, att_df, pid_df, sampling_info, meta_info = parser.parse()
+    print("\nFlight durations:")
+    if not gps_df.empty:
+        print("GPS:", gps_df["Time_sec"].max())
+    if not imu_df.empty:
+        print("IMU:", imu_df["Time_sec"].max())
+    if not att_df.empty:
+        print("ATT:", att_df["Time_sec"].max())
 
-    print("\n📡 Sampling frequencies:")
+    print("\nSampling frequencies:")
     for k, v in sampling_info.items():
         print(f"{k}: {v:.2f} Hz")
-
-    print("\n📊 Data samples:")
-    print("GPS:", gps_df.shape)
-    print("IMU:", imu_df.shape)
-    print("ATT:", att_df.shape)
-    print("PID:", pid_df.shape)
