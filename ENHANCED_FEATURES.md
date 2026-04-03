@@ -107,11 +107,11 @@ If API key unavailable, system uses rule-based analysis:
 #### Key Functions
 
 ```python
-from app.core.theory import (
-    quaternion_from_euler,      # Euler → Quaternion conversion
-    euler_from_quaternion,      # Quaternion → Euler conversion
-    quaternion_multiply,        # Quaternion composition
-    estimate_bias_from_data     # IMU bias estimation from static periods
+from theory import (
+    quaternion_from_euler,  # Euler → Quaternion conversion
+    euler_from_quaternion,  # Quaternion → Euler conversion
+    quaternion_multiply,  # Quaternion composition
+    estimate_bias_from_data  # IMU bias estimation from static periods
 )
 
 # Quaternion example (avoids gimbal lock)

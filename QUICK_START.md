@@ -99,7 +99,7 @@ app/
 - **[README.md](README.md)** - Повний опис
 - **[ENHANCED_FEATURES.md](ENHANCED_FEATURES.md)** - Нові можливості
 - **[INSTALL.md](INSTALL.md)** - Деталі встановлення
-- **[app/core/theory.py](app/core/theory.py)** - Математичні основи
+- **[app/core/theory.py](app/theory.py)** - Математичні основи
 
 ## Проблеми Та Рішення
 

@@ -29,7 +29,7 @@ def plot_2d_top_view(df, color_mode="speed"):
         
         fig = go.Figure()
         
-        # === MAIN PATH (line without colorscale) ===
+        # MAIN PATH
         fig.add_trace(go.Scatter(
             x=df["east"],
             y=df["north"],
@@ -43,7 +43,7 @@ def plot_2d_top_view(df, color_mode="speed"):
             showlegend=False
         ))
         
-        # === PATH MARKERS (with colorscale) ===
+        # PATH MARKERS
         fig.add_trace(go.Scatter(
             x=df["east"],
             y=df["north"],
@@ -65,7 +65,7 @@ def plot_2d_top_view(df, color_mode="speed"):
             showlegend=False
         ))
         
-        # === START ===
+        # START
         fig.add_trace(go.Scatter(
             x=[df["east"].iloc[0]],
             y=[df["north"].iloc[0]],
@@ -79,7 +79,7 @@ def plot_2d_top_view(df, color_mode="speed"):
             showlegend=True
         ))
         
-        # === END ===
+        # END
         fig.add_trace(go.Scatter(
             x=[df["east"].iloc[-1]],
             y=[df["north"].iloc[-1]],
@@ -93,7 +93,7 @@ def plot_2d_top_view(df, color_mode="speed"):
             showlegend=True
         ))
         
-        # === DISTANCE & DIRECTION ===
+        # DISTANCE & DIRECTION
         total_dist = np.sqrt((df["east"].iloc[-1] - df["east"].iloc[0])**2 + 
                             (df["north"].iloc[-1] - df["north"].iloc[0])**2)
         
@@ -140,9 +140,9 @@ def plot_2d_top_view(df, color_mode="speed"):
 
 
 def plot_altitude_profile(df):
-    """
-    Create altitude vs. distance profile for detailed analysis.
-"""
+
+    #Create altitude vs. distance profile for detailed analysis.
+
     try:
         # Calculate cumulative distance along path
         distances = np.sqrt(np.diff(df["east"])**2 + np.diff(df["north"])**2)
@@ -151,7 +151,7 @@ def plot_altitude_profile(df):
         # Create figure with secondary y-axis for speed
         fig = go.Figure()
         
-        # === ALTITUDE LINE ===
+        # ALTITUDE LINE
         fig.add_trace(go.Scatter(
             x=cumulative_dist,
             y=df["up"],
@@ -165,7 +165,7 @@ def plot_altitude_profile(df):
             showlegend=True
         ))
         
-        # === SPEED OVERLAY (if available) ===
+        # SPEED OVERLAY
         if "speed" in df.columns:
             fig.add_trace(go.Scatter(
                 x=cumulative_dist,
@@ -264,7 +264,7 @@ def plot_3d_trajectory(df, color_mode="speed"):
         color_values = np.nan_to_num(color_values, nan=0.0, posinf=0.0, neginf=0.0)
         color_values = color_values.tolist()  # Convert numpy array to Python list
         
-        # === MAIN TRAJECTORY LINE ===
+        # MAIN TRAJECTORY LINE
         fig = go.Figure(data=[go.Scatter3d(
             x=df["east"],
             y=df["north"],
@@ -291,7 +291,7 @@ def plot_3d_trajectory(df, color_mode="speed"):
             showlegend=False
         )])
         
-        # === START POINT ===
+        # START POINT
         fig.add_trace(go.Scatter3d(
             x=[df["east"].iloc[0]],
             y=[df["north"].iloc[0]],
@@ -314,7 +314,7 @@ def plot_3d_trajectory(df, color_mode="speed"):
             showlegend=True
         ))
         
-        # === END POINT ===
+        # END POINT
         fig.add_trace(go.Scatter3d(
             x=[df["east"].iloc[-1]],
             y=[df["north"].iloc[-1]],
@@ -338,7 +338,7 @@ def plot_3d_trajectory(df, color_mode="speed"):
             showlegend=True
         ))
         
-        # === KEY ALTITUDE POINTS ===
+        # KEY ALTITUDE POINTS
         if "up" in df.columns:
             max_alt_idx = df["up"].idxmax()
             min_alt_idx = df["up"].idxmin()
@@ -364,7 +364,7 @@ def plot_3d_trajectory(df, color_mode="speed"):
                     showlegend=True
                 ))
         
-        # === SPEED MARKERS (every 25% of flight for visual guides) ===
+        # SPEED MARKERS
         if len(df) > 4:
             step = len(df) // 4
             for i in range(1, 4):
@@ -385,7 +385,7 @@ def plot_3d_trajectory(df, color_mode="speed"):
                                       "Progress: " + str(int(100*i/4)) + "%<extra></extra>"
                     ))
         
-        # === REFERENCE PLANE (ground level) ===
+        # REFERENCE PLANE
         min_east = df["east"].min()
         max_east = df["east"].max()
         min_north = df["north"].min()
@@ -403,7 +403,7 @@ def plot_3d_trajectory(df, color_mode="speed"):
             name='Ground Level'
         ))
         
-        # === LAYOUT ===
+        # LAYOUT
         fig.update_layout(
             title={
                 'text': "<b>3D Flight Trajectory Analysis</b><br>" +
@@ -467,7 +467,7 @@ def plot_3d_trajectory(df, color_mode="speed"):
         
         # Add interaction instructions
         fig.add_annotation(
-            text="💡 <b>Rotate</b>: Click + Drag | <b>Zoom</b>: Scroll",
+            text=" <b>Rotate</b>: Click + Drag | <b>Zoom</b>: Scroll",
             xref="paper", yref="paper",
             x=0.01, y=0.01,
             showarrow=False,
@@ -486,19 +486,9 @@ def plot_3d_trajectory(df, color_mode="speed"):
 
 
 def plot_flight_map(gps_df):
-    """
-    Create interactive Folium map showing flight path on Earth.
-    
-    Args:
-        gps_df: DataFrame with columns 'lat', 'lon', 'alt' (and optionally 'speed')
-        
-    Returns:
-        folium.Map object
-        
-    Raises:
-        ImportError: If folium not installed
-        ValueError: If required columns missing
-    """
+
+    #Create interactive Folium map showing flight path on Earth.
+
     try:
         import folium
         from folium import plugins
@@ -521,7 +511,7 @@ def plot_flight_map(gps_df):
             tiles='OpenStreetMap'
         )
         
-        # === ADD FLIGHT PATH ===
+        # ADD FLIGHT PATH
         path_coords = [[row['lat'], row['lon']] for idx, row in gps_df.iterrows()]
         
         folium.PolyLine(
@@ -532,14 +522,14 @@ def plot_flight_map(gps_df):
             popup='Flight Path'
         ).add_to(map_flight)
         
-        # === START POINT ===
+        # START POINT
         start_lat, start_lon = gps_df['lat'].iloc[0], gps_df['lon'].iloc[0]
         start_alt = gps_df['alt'].iloc[0]
         
         folium.Marker(
             location=[start_lat, start_lon],
             popup=f"<b>START</b><br>Altitude: {start_alt:.1f} m",
-            tooltip='🚀 START',
+            tooltip=' START',
             icon=folium.Icon(color='green', icon='play', prefix='fa'),
             zoom_on_click=True
         ).add_to(map_flight)
@@ -556,7 +546,7 @@ def plot_flight_map(gps_df):
             zoom_on_click=True
         ).add_to(map_flight)
         
-        # === MAX ALTITUDE POINT ===
+        # MAX ALTITUDE POINT
         if 'alt' in gps_df.columns:
             max_alt_idx = gps_df['alt'].idxmax()
             max_alt = gps_df['alt'].iloc[max_alt_idx]
@@ -571,7 +561,7 @@ def plot_flight_map(gps_df):
                 zoom_on_click=True
             ).add_to(map_flight)
         
-        # === ADD SPEED INDICATORS (if available) ===
+        # ADD SPEED INDICATORS
         if 'speed' in gps_df.columns:
             # Add circles for each point (size = speed)
             for idx, row in gps_df.iterrows():
@@ -590,7 +580,7 @@ def plot_flight_map(gps_df):
                         weight=1
                     ).add_to(map_flight)
         
-        # === ADD DISTANCE MEASUREMENT ===
+        # ADD DISTANCE MEASUREMENT
         total_distance = 0
         for i in range(len(gps_df) - 1):
             lat1, lon1 = gps_df['lat'].iloc[i], gps_df['lon'].iloc[i]
