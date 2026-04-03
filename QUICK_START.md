@@ -134,6 +134,7 @@ See `example.py` for complete working examples.
 app/
 ├── theory.py                # Mathematical foundations
 └── core/
+    ├── __init__.py
     ├── app.py              # Streamlit web application
     ├── parser.py           # Binary log parsing
     ├── metrics.py          # Metrics computation
