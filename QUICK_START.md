@@ -29,10 +29,10 @@ The browser will open automatically at http://localhost:8501
 
 ## What You'll See
 
-- 📊 **Metrics**: Flight distance, speed, acceleration, duration
-- 🛤️ **3D Trajectory**: Interactive map of the flight path  
-- 📈 **Graphs**: Altitude profile, horizontal and vertical speed over time
-- 🤖 **AI Analysis** (optional): Anomalies, insights, and recommendations
+-  **Metrics**: Flight distance, speed, acceleration, duration
+-  **3D Trajectory**: Interactive map of the flight path  
+-  **Graphs**: Altitude profile, horizontal and vertical speed over time
+-  **AI Analysis** (optional): Anomalies, insights, and recommendations
 
 ## Using AI Analysis (Optional)
 
@@ -173,11 +173,11 @@ streamlit run app/core/app.py --server.port 8502
 
 ## Next Steps
 
-1. ✅ Run Streamlit web app
-2. 🚀 Upload your flight log
-3. 📊 Review metrics and visualizations
-4. 🤖 Optional: Configure Groq API key for AI analysis
-5. 📤 Export processed data to CSV
+1.  Run Streamlit web app
+2.  Upload your flight log
+3.  Review metrics and visualizations
+4.  Optional: Configure Groq API key for AI analysis
+5.  Export processed data to CSV
 
 ---
 
