@@ -4,22 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d93026b8-b135-4f92-8c81-8c9c84930ed8" name="Changes" comment="idk">
+    <list default="true" id="d93026b8-b135-4f92-8c81-8c9c84930ed8" name="Changes" comment="visualize code for better understanding">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ENHANCED_FEATURES.md" beforeDir="false" afterPath="$PROJECT_DIR$/ENHANCED_FEATURES.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/QUICK_START.md" beforeDir="false" afterPath="$PROJECT_DIR$/QUICK_START.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/core/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/core/ai_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/ai_analysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/core/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/core/coordinates.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/coordinates.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/core/integration.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/integration.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/core/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/metrics.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/core/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/parser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/core/theory.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/theory.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/core/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/core/visualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/visualization.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -193,7 +179,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775212514729</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="visualize code for better understanding">
+      <option name="closed" value="true" />
+      <created>1775242746739</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1775242746739</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -230,6 +224,7 @@
     <MESSAGE value="changed parser.py for reading all types of bin-data" />
     <MESSAGE value="deleted unnecessary files and changed font for text in 3d view" />
     <MESSAGE value="Added usefully links to github and readme" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added usefully links to github and readme" />
+    <MESSAGE value="visualize code for better understanding" />
+    <option name="LAST_COMMIT_MESSAGE" value="visualize code for better understanding" />
   </component>
 </project>
