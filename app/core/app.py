@@ -28,17 +28,16 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Page config (MUST be first Streamlit command - only one call allowed)
+# Page config
 st.set_page_config(
     page_title="ArduPilot Flight Analyzer",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Theme config is now in .streamlit/config.toml
 
 st.markdown("""
-<h1 style='text-align: center;'>🚀 ArduPilot Flight Log Analyzer</h1>
+<h1 style='text-align: center;'> ArduPilot Flight Log Analyzer</h1>
 <p style='text-align: center; font-size:18px;'>
 Professional drone telemetry analysis platform
 </p>
@@ -46,7 +45,7 @@ Professional drone telemetry analysis platform
 
 # Sidebar
 with st.sidebar:
-    st.header("📋 About")
+    st.header("- About")
     st.markdown("""
     Advanced flight log analysis tool for ArduPilot-based systems.
     
@@ -63,7 +62,7 @@ with st.sidebar:
     """)
     
     st.markdown("---")
-    st.header("⚙️ Options")
+    st.header("- Options")
     st.markdown("---")
     
     enable_ai = st.checkbox(
@@ -79,7 +78,7 @@ with st.sidebar:
     )
     
     st.markdown("---")
-    st.header("🔗 Links")
+    st.header("- Links")
     st.markdown("[GitHub](https://github.com/XkrasherX/Hackaton.git)")
     st.markdown("[Documentation](https://github.com/XkrasherX/Hackaton/blob/master/README.md)")
     st.markdown("[Support](https://github.com/Nestors1234/ArduPilot-Flight-Log-Analyzer/issues)")
@@ -98,7 +97,7 @@ Upload your log files to analyze flight characteristics, detect anomalies, and v
 """)
 
 uploaded_file = st.file_uploader(
-    "📤 Upload .BIN or .LOG file",
+    " Upload .BIN or .LOG file",
     type=["bin", "log"],
     help="Select your ArduPilot flight log file"
 )
@@ -148,10 +147,10 @@ if uploaded_file is not None:
         if not gps_df.empty:
             logger.info(f"GPS null counts: {gps_df.isnull().sum().to_dict()}")
 
-        # Clean GPS data - only require lat and lon
+        # Clean GPS data
         gps_df = gps_df.dropna(subset=["lat", "lon"])
         
-        # Clean IMU data - check for renamed columns
+        # Clean IMU data
         if "acc_x" in imu_df.columns and "acc_y" in imu_df.columns and "acc_z" in imu_df.columns:
             imu_df = imu_df.dropna(subset=["acc_x", "acc_y", "acc_z"])
         
@@ -240,49 +239,49 @@ if uploaded_file is not None:
 
         # === DISPLAY METRICS ===
         
-        st.markdown("## 📊 Flight Metrics Dashboard")
+        st.markdown("## Flight Metrics Dashboard")
         
         # Create columns for metrics
         col1, col2, col3 = st.columns(3)
 
         with col1:
             st.metric(
-                "⏱️ Flight Duration",
+                " Flight Duration",
                 f"{duration:.2f} s",
                 f"{duration/60:.2f} min"
             )
             st.metric(
-                "📏 Total Distance",
+                " Total Distance",
                 f"{total_distance:.2f} m",
                 f"{total_distance/1000:.3f} km"
             )
 
         with col2:
             st.metric(
-                "🏃 Max Horiz. Speed",
+                "Max Horiz. Speed",
                 f"{max_horizontal_speed:.2f} m/s",
                 f"{max_horizontal_speed*3.6:.1f} km/h"
             )
             st.metric(
-                "📈 Max Vert. Speed",
+                "Max Vert. Speed",
                 f"{max_vertical_speed:.2f} m/s",
                 f"{max_vertical_speed*3.6:.1f} km/h"
             )
 
         with col3:
             st.metric(
-                "⚡ Max Acceleration",
+                "Max Acceleration",
                 f"{max_acc:.2f} m/s²",
                 f"{max_acc/9.81:.2f}g"
             )
             st.metric(
-                "📊 Max Alt. Gain",
+                "Max Alt. Gain",
                 f"{max_alt_gain:.2f} m"
             )
 
         # === ALTITUDE & SPEED PROFILES ===
         
-        with st.expander("🏔️ Altitude Profile Over Time", expanded=False):
+        with st.expander("Altitude Profile Over Time", expanded=False):
             alt_data = pd.DataFrame({
                 'Time (s)': (gps_df['time_us'] - gps_df['time_us'].iloc[0]) / 1e6,
                 'Altitude (m)': gps_df['alt']
@@ -308,7 +307,7 @@ if uploaded_file is not None:
             )
             st.plotly_chart(fig_alt, use_container_width=True)
 
-        with st.expander("💨 Speed Profile Over Time", expanded=False):
+        with st.expander("Speed Profile Over Time", expanded=False):
             speed_data = pd.DataFrame({
                 'Time (s)': (gps_df['time_us'] - gps_df['time_us'].iloc[0]) / 1e6,
                 'Horiz. Speed (m/s)': horizontal_speed,
@@ -343,10 +342,10 @@ if uploaded_file is not None:
 
         # === VISUALIZATION TABS ===
 
-        st.markdown("## 🗺️ Flight Visualizations")
+        st.markdown("## Flight Visualizations")
         
         # Create tabs for different visualization types
-        tab1, tab2, tab3, tab4 = st.tabs(["🧭 3D Trajectory", "🗺️ Top View", "📈 Altitude Profile", "🌍 Flight Map"])
+        tab1, tab2, tab3, tab4 = st.tabs(["3D Trajectory", "Top View", "Altitude Profile", "Flight Map"])
         
         with tab1:
             st.markdown("### Interactive 3D Flight Path")
@@ -365,10 +364,10 @@ if uploaded_file is not None:
                 st.plotly_chart(fig, use_container_width=True)
                 st.markdown("""
                 **How to use:**
-                - 🖱️ **Rotate**: Click and drag to rotate
-                - 🔍 **Zoom**: Scroll wheel to zoom in/out
-                - 📍 **Pan**: Right-click and drag to move
-                - 🏠 **Reset**: Double-click to reset view
+                - Rotate: Click and drag to rotate
+                - Zoom: Scroll wheel to zoom in/out
+                - Pan: Right-click and drag to move
+                - Reset: Double-click to reset view
                 """)
             except Exception as e:
                 st.error(f"Error creating 3D visualization: {e}")
@@ -391,10 +390,8 @@ if uploaded_file is not None:
                 st.plotly_chart(fig2d, use_container_width=True)
                 st.markdown("""
                 **Top-down view shows:**
-                - Direct flight path (East-North plane)
-                - Start (🟢 green diamond) and landing point (❌ red cross)
-                - Direct distance between start and end
-                - Horizontal routing patterns
+                - Green diamond (🟢 Start): Starting position
+                - Red cross (❌ Land): Enging position
                 """)
             except Exception as e:
                 st.error(f"Error creating 2D visualization: {e}")
@@ -408,31 +405,27 @@ if uploaded_file is not None:
                 st.plotly_chart(fig_alt, use_container_width=True)
                 st.markdown("""
                 **Profile Analysis:**
-                - 🔵 **Blue line**: Altitude over distance (left axis)
-                - 🟠 **Orange dashed line**: Speed over distance (right axis)
-                - Shows climb/descent patterns and speed changes
-                - Useful for identifying maneuvers and flight phases
+                - Blue line (🔵 Altitude): Altitude over distance (left axis)
+                - Orange dashed line (🟠 Speed): Speed over distance (right axis)
                 """)
             except Exception as e:
                 st.error(f"Error creating altitude profile: {e}")
                 logger.error(f"Altitude profile error: {e}")
         
         with tab4:
-            st.markdown("### Interactive Flight Map")
-            
-            st.markdown("""
-            **🌍 Interactive Map Legend:**
-            - 🟢 **Green Marker (START)**: Takeoff location
-            - 🔴 **Red Marker (LANDING)**: Landing location
-            - 🟠 **Orange Marker (⬆)**: Maximum altitude point
-            - 🔵 **Blue Dots & Line**: Flight path with speed indicators (dot size = speed)
-            - 📍 **Info Box** (bottom-right): Flight statistics
-            """)
-            
             try:
                 if streamlit_folium:
                     map_flight = plot_flight_map(gps_df)
                     streamlit_folium.folium_static(map_flight)
+                    st.markdown("### Interactive Flight Map")
+
+                    st.markdown("""
+                    **Interactive Map Legend:**
+                    - Green Marker (🟢 Start): Starting position
+                    - Red Marker (🔴 Land): Enging position
+                    - Orange Marker (⬆️ Altitude): Maximum altitude point
+                    - Blue Dots & Line (🔵 Speed): Flight path with speed indicators (dot size = speed)
+                    """)
                 else:
                     st.warning("Folium not available. Install with: pip install folium streamlit-folium")
             except Exception as e:
@@ -442,9 +435,9 @@ if uploaded_file is not None:
         # === AI ANALYSIS ===
         
         if enable_ai:
-            st.markdown("## 🤖 AI Flight Analysis")
+            st.markdown("## AI Flight Analysis")
             
-            with st.spinner("🔮 Analyzing flight with AI..."):
+            with st.spinner("Analyzing flight with AI..."):
                 analysis = analyze_flight_with_ai(
                     metrics,
                     gps_df,
@@ -453,22 +446,22 @@ if uploaded_file is not None:
                 )
             
             # Display AI analysis
-            st.markdown("### 📋 Summary")
+            st.markdown("### Summary")
             st.info(analysis.get('summary', ''))
             
-            st.markdown("### ⚠️ Anomalies")
+            st.markdown("### Anomalies")
             anomalies = analysis.get('anomalies', '')
             if anomalies and "No major anomalies" not in anomalies:
                 st.warning(anomalies)
             else:
                 st.success("[OK] No significant anomalies detected")
             
-            st.markdown("### 💡 Recommendations")
+            st.markdown("### Recommendations")
             st.success(analysis.get('recommendations', ''))
 
         # === ADVANCED STATISTICS ===
         
-        with st.expander("📈 Advanced Statistics"):
+        with st.expander("Advanced Statistics"):
             col1, col2 = st.columns(2)
             
             with col1:
@@ -491,14 +484,14 @@ if uploaded_file is not None:
 
         # === DATA EXPORT ===
         
-        st.markdown("## 📥 Export Data")
+        st.markdown("## Export Data")
         
         col_gps, col_imu, col_combined = st.columns(3)
         
         with col_gps:
             csv_gps = gps_df.to_csv(index=False)
             st.download_button(
-                label="📍 GPS Data (CSV)",
+                label="GPS Data (CSV)",
                 data=csv_gps,
                 file_name=f"{os.path.splitext(uploaded_file.name)[0]}_gps.csv",
                 mime="text/csv",
@@ -509,7 +502,7 @@ if uploaded_file is not None:
             if not imu_df.empty:
                 csv_imu = imu_df.to_csv(index=False)
                 st.download_button(
-                    label="📊 IMU Data (CSV)",
+                    label="IMU Data (CSV)",
                     data=csv_imu,
                     file_name=f"{os.path.splitext(uploaded_file.name)[0]}_imu.csv",
                     mime="text/csv",
@@ -529,7 +522,7 @@ if uploaded_file is not None:
                 ).sort_values('time_us')
                 csv_combined = combined_df.to_csv(index=False)
                 st.download_button(
-                    label="🔗 All Data (CSV)",
+                    label="All Data (CSV)",
                     data=csv_combined,
                     file_name=f"{os.path.splitext(uploaded_file.name)[0]}_combined.csv",
                     mime="text/csv",

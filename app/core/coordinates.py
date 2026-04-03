@@ -6,17 +6,9 @@ logger = logging.getLogger(__name__)
 
 
 def wgs84_to_ecef(lat, lon, alt):
-    """
-    Convert WGS84 geographic coordinates to ECEF (Earth-Centered, Earth-Fixed).
-    
-    Args:
-        lat: Latitude in degrees
-        lon: Longitude in degrees
-        alt: Altitude in meters
-        
-    Returns:
-        tuple: (x, y, z) ECEF coordinates in meters
-    """
+
+    #Convert WGS84 coordinates to ECEF
+
     try:
         transformer = Transformer.from_crs(
             "epsg:4326", "epsg:4978", always_xy=True
@@ -29,18 +21,9 @@ def wgs84_to_ecef(lat, lon, alt):
 
 
 def ecef_to_enu(x, y, z, ref_lat, ref_lon, ref_alt):
-    """
-    Convert ECEF coordinates to ENU (East-North-Up) local coordinates.
-    
-    Args:
-        x, y, z: ECEF coordinates in meters
-        ref_lat: Reference latitude in degrees
-        ref_lon: Reference longitude in degrees
-        ref_alt: Reference altitude in meters
-        
-    Returns:
-        tuple: (east, north, up) ENU coordinates relative to reference point in meters
-    """
+
+    #Convert ECEF coordinates to ENU (East-North-Up) local coordinates.
+
     try:
         transformer = Transformer.from_crs(
             "epsg:4326", "epsg:4978", always_xy=True

@@ -5,16 +5,9 @@ logger = logging.getLogger(__name__)
 
 
 def trapezoidal_integration(time_us, values):
-    """
-    Numerical integration using trapezoidal rule.
-    
-    Args:
-        time_us: Time values in microseconds (numpy array)
-        values: Values to integrate (numpy array)
-        
-    Returns:
-        numpy array: Integrated values
-    """
+
+    #Numerical integration using trapezoidal rule.
+
     if len(time_us) != len(values):
         raise ValueError("Time and values arrays must have same length")
     
@@ -43,15 +36,6 @@ def compute_velocity_from_acc(imu_df):
     
     Uses trapezoidal integration on acceleration data to compute
     velocity components in the aircraft's body frame (x, y, z axes).
-    
-    Args:
-        imu_df: DataFrame with columns 'time_us', 'acc_x', 'acc_y', 'acc_z'
-        
-    Returns:
-        tuple: (vx, vy, vz) - Velocity components in m/s
-        
-    Raises:
-        ValueError: If required columns are missing
     """
     required_cols = ['time_us', 'acc_x', 'acc_y', 'acc_z']
     missing_cols = [col for col in required_cols if col not in imu_df.columns]

@@ -294,11 +294,11 @@ fig.show()
 Математичні основи всіх алгоритмів та трансформацій
 
 ```python
-from app.core.theory import (
-    quaternion_from_euler,      # Кватерніони з кутів Ейлера
-    euler_from_quaternion,      # Обернене перетворення
-    quaternion_multiply,        # Композиція обертань
-    estimate_bias_from_data,    # Оцінка зміщення IMU
+from theory import (
+    quaternion_from_euler,  # Кватерніони з кутів Ейлера
+    euler_from_quaternion,  # Обернене перетворення
+    quaternion_multiply,  # Композиція обертань
+    estimate_bias_from_data,  # Оцінка зміщення IMU
 )
 ```
 
@@ -420,7 +420,7 @@ print(analysis['recommendations'])
 ### Використання теорії та кватерніонів
 
 ```python
-from core.theory import (
+from theory import (
     quaternion_from_euler,
     euler_from_quaternion,
     quaternion_multiply,
@@ -513,7 +513,7 @@ gps_df, imu_df = parse_ardupilot_log('data/00000001.BIN')
 Для повної інформації про нові функції перегляньте:
 
 - **[ENHANCED_FEATURES.md](ENHANCED_FEATURES.md)** - AI análіз, модуль theory, покращений дашборд- **[VISUALIZATION_IMPROVEMENTS.md](VISUALIZATION_IMPROVEMENTS.md)** - Красиві 3D графіки та профілі (НОВЕ)- **[INSTALL.md](INSTALL.md)** - Детальні інструкції встановлення
-- **[app/core/theory.py](app/core/theory.py)** - Математичні основи (кватерніони, інтегрування, координати)
+- **[app/core/theory.py](app/theory.py)** - Математичні основи (кватерніони, інтегрування, координати)
 - **[app/core/ai_analysis.py](app/core/ai_analysis.py)** - LLM-інтеграція та аналіз
 ## 🎯 Розпочнути
 

@@ -6,18 +6,9 @@ logger = logging.getLogger(__name__)
 
 
 def merge_gps_coordinates(gps_df, east, north, up):
-    """
-    Merge ENU coordinates with GPS data.
-    
-    Args:
-        gps_df: DataFrame with GPS data
-        east: East coordinates array
-        north: North coordinates array
-        up: Up coordinates array
-        
-    Returns:
-        DataFrame: Copy of GPS data with added ENU columns
-    """
+
+    #Merge ENU coordinates with GPS data.
+
     gps_df = gps_df.copy()
     gps_df["east"] = east
     gps_df["north"] = north
@@ -26,16 +17,9 @@ def merge_gps_coordinates(gps_df, east, north, up):
 
 
 def export_csv(df, filename="flight_data.csv"):
-    """
-    Export DataFrame to CSV file.
-    
-    Args:
-        df: DataFrame to export
-        filename: Output filename
-        
-    Returns:
-        str: Path to exported file
-    """
+
+    #Export DataFrame to CSV file.
+
     try:
         path = Path(filename)
         df.to_csv(path, index=False)
@@ -47,16 +31,9 @@ def export_csv(df, filename="flight_data.csv"):
 
 
 def export_json(df, filename="flight_data.json"):
-    """
-    Export DataFrame to JSON file.
-    
-    Args:
-        df: DataFrame to export
-        filename: Output filename
-        
-    Returns:
-        str: Path to exported file
-    """
+
+    #Export DataFrame to JSON file.
+
     try:
         path = Path(filename)
         df.to_json(path, orient='records')
@@ -68,17 +45,9 @@ def export_json(df, filename="flight_data.json"):
 
 
 def create_summary_report(gps_df, imu_df, metrics):
-    """
-    Create a summary report of flight analysis.
-    
-    Args:
-        gps_df: GPS DataFrame
-        imu_df: IMU DataFrame
-        metrics: Dictionary with computed metrics
-        
-    Returns:
-        str: Formatted summary report
-    """
+
+    #Create a summary report of flight analysis.
+
     report = []
     report.append("="*60)
     report.append("FLIGHT ANALYSIS REPORT")

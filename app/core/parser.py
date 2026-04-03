@@ -14,9 +14,8 @@ class ArduPilotLogParser:
         self.att_data = []
         self.pid_data = []
 
-    # =====================================================
+
     # MAIN
-    # =====================================================
 
     def parse(self):
         print("[*] Parsing log...")
@@ -48,9 +47,7 @@ class ArduPilotLogParser:
 
         return self._build_output()
 
-    # =====================================================
     # SAFE TIME EXTRACTION
-    # =====================================================
 
     def _extract_time_us(self, msg):
         if hasattr(msg, "TimeUS") and msg.TimeUS is not None:
@@ -64,9 +61,7 @@ class ArduPilotLogParser:
 
         return None
 
-    # =====================================================
     # GPS
-    # =====================================================
 
     def _parse_gps(self, msg):
         msg_type = msg.get_type()
@@ -101,9 +96,7 @@ class ArduPilotLogParser:
             "Satellites": getattr(msg, "NSats", getattr(msg, "Nsat", None))
         })
 
-    # =====================================================
     # IMU
-    # =====================================================
 
     def _parse_imu(self, msg):
         t = self._extract_time_us(msg)
@@ -118,9 +111,7 @@ class ArduPilotLogParser:
             "GyrZ": getattr(msg, "GyrZ", getattr(msg, "zgyro", None)),
         })
 
-    # =====================================================
     # ATTITUDE
-    # =====================================================
 
     def _parse_att(self, msg):
         msg_type = msg.get_type()
@@ -145,9 +136,7 @@ class ArduPilotLogParser:
             "DesYaw_deg": getattr(msg, "DesYaw", None),
         })
 
-    # =====================================================
     # PID
-    # =====================================================
 
     def _parse_pid(self, msg):
         t = self._extract_time_us(msg)
@@ -167,9 +156,7 @@ class ArduPilotLogParser:
             "Flags": getattr(msg, "Flags", None),
         })
 
-    # =====================================================
     # BUILD OUTPUT
-    # =====================================================
 
     def _build_output(self):
 
@@ -189,7 +176,7 @@ class ArduPilotLogParser:
 
                     # Detect time reset
                     if np.any(np.diff(valid_time.values) < 0):
-                        print("⚠ Warning: Time reset detected in log")
+                        print("Warning: Time reset detected in log")
 
         sampling_info = {
             "GPS_Hz": self._estimate_freq(gps_df),
@@ -207,9 +194,7 @@ class ArduPilotLogParser:
 
         return gps_df, imu_df, att_df, pid_df, sampling_info, meta_info
 
-    # =====================================================
     # FREQUENCY (ROBUST)
-    # =====================================================
 
     def _estimate_freq(self, df):
         if df.empty or "TimeUS" not in df:
@@ -229,18 +214,14 @@ class ArduPilotLogParser:
         return 1.0 / median_dt
 
 
-# =====================================================
 # WRAPPER
-# =====================================================
 
 def parse_ardupilot_log(file_path):
     parser = ArduPilotLogParser(file_path)
     return parser.parse()
 
 
-# =====================================================
 # RUN
-# =====================================================
 
 if __name__ == "__main__":
 

@@ -29,15 +29,9 @@ def haversine(lat1, lon1, lat2, lon2):
 
 
 def compute_total_distance_haversine(gps_df):
-    """
-    Compute total horizontal distance traveled using Haversine formula.
-    
-    Args:
-        gps_df: DataFrame with 'lat', 'lon' columns
-        
-    Returns:
-        float: Total distance in meters
-    """
+
+    #Compute total horizontal distance traveled using Haversine formula.
+
     if gps_df.empty or len(gps_df) < 2:
         logger.warning("Empty or insufficient GPS data for distance calculation")
         return 0.0
@@ -55,15 +49,9 @@ def compute_total_distance_haversine(gps_df):
 
 
 def compute_speed_components(gps_df):
-    """
-    Compute horizontal and vertical speed components from GPS data.
-    
-    Args:
-        gps_df: DataFrame with 'lat', 'lon', 'alt', 'time_us' columns
-        
-    Returns:
-        tuple: (horizontal_speed, vertical_speed) as numpy arrays
-    """
+
+    #Compute horizontal and vertical speed components from GPS data.
+
     if gps_df.empty or len(gps_df) < 2:
         logger.warning("Empty or insufficient GPS data for speed calculation")
         return np.array([]), np.array([])
@@ -85,10 +73,7 @@ def compute_speed_components(gps_df):
     ]
 
     horizontal_speed = np.array(horizontal_dist) / dt.values
-    
-    # Fix unrealistic speed values (likely GPS errors at start/end)
-    # Max drone speed is typically ~100 m/s (360 km/h)
-    # Filter out outliers using median absolute deviation
+
     valid_speeds = horizontal_speed[horizontal_speed < 200]  # Initial filter
     if len(valid_speeds) > 0:
         median_speed = np.median(valid_speeds)
@@ -122,15 +107,9 @@ def compute_speed_components(gps_df):
 
 
 def compute_max_acceleration(imu_df):
-    """
-    Compute maximum acceleration magnitude from IMU data.
-    
-    Args:
-        imu_df: DataFrame with 'acc_x', 'acc_y', 'acc_z' columns
-        
-    Returns:
-        float: Maximum acceleration magnitude in m/s^2
-    """
+
+    #Compute maximum acceleration magnitude from IMU data.
+
     if imu_df.empty or not all(col in imu_df.columns for col in ["acc_x", "acc_y", "acc_z"]):
         logger.warning("Empty or incomplete IMU data for acceleration calculation")
         return 0.0
@@ -144,15 +123,9 @@ def compute_max_acceleration(imu_df):
 
 
 def compute_max_altitude_gain(gps_df):
-    """
-    Compute cumulative maximum altitude gain (only positive changes).
-    
-    Args:
-        gps_df: DataFrame with 'alt' column
-        
-    Returns:
-        float: Maximum cumulative altitude gain in meters
-    """
+
+    #Compute cumulative maximum altitude gain (only positive changes).
+
     if gps_df.empty or len(gps_df) < 2:
         logger.warning("Empty or insufficient GPS data for altitude calculation")
         return 0.0
@@ -170,15 +143,9 @@ def compute_max_altitude_gain(gps_df):
 
 
 def compute_duration(gps_df):
-    """
-    Compute flight duration from GPS timestamp range.
-    
-    Args:
-        gps_df: DataFrame with 'time_us' column
-        
-    Returns:
-        float: Duration in seconds
-    """
+
+    #Compute flight duration from GPS timestamp range.
+
     if gps_df.empty or len(gps_df) < 2:
         logger.warning("Empty or insufficient GPS data for duration calculation")
         return 0.0
