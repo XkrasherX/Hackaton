@@ -28,113 +28,212 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# =====================================================
-# THEME CONFIGURATION
-# =====================================================
-
-THEMES = {
-    "Light": {
-        "primary": "#0066cc",
-        "background": "#ffffff",
-        "secondary": "#e8ecef",
-        "text": "#262730",
-        "card_bg": "#f0f2f6",
-    },
-    "Dark": {
-        "primary": "#0099ff",
-        "background": "#0e1117",
-        "secondary": "#1c2128",
-        "text": "#e6edf3",
-        "card_bg": "#1c2128",
-    },
-    "Ocean": {
-        "primary": "#0077be",
-        "background": "#f0f4f8",
-        "secondary": "#d4e8f7",
-        "text": "#001d3d",
-        "card_bg": "#e8f4f8",
-    },
-    "Forest": {
-        "primary": "#2d6a4f",
-        "background": "#f1faee",
-        "secondary": "#e8f5e9",
-        "text": "#1b4332",
-        "card_bg": "#d8f3dc",
-    },
-}
-
-def apply_theme_css(theme_name):
-    """Generate and apply dynamic CSS based on selected theme"""
-    theme = THEMES.get(theme_name, THEMES["Light"])
-    
-    css = f"""
-    <style>
-        :root {{
-            --primary-color: {theme['primary']};
-            --bg-color: {theme['background']};
-            --secondary-color: {theme['secondary']};
-            --text-color: {theme['text']};
-        }}
-        
-        .metric-card {{
-            background-color: {theme['card_bg']};
-            padding: 20px;
-            border-radius: 10px;
-            margin: 10px 0;
-            border-left: 4px solid {theme['primary']};
-        }}
-        
-        .success-box {{
-            background-color: #d4edda;
-            padding: 15px;
-            border-radius: 5px;
-            border-left: 4px solid #28a745;
-            color: #155724;
-        }}
-        
-        .warning-box {{
-            background-color: #fff3cd;
-            padding: 15px;
-            border-radius: 5px;
-            border-left: 4px solid #ffc107;
-            color: #856404;
-        }}
-        
-        .danger-box {{
-            background-color: #f8d7da;
-            padding: 15px;
-            border-radius: 5px;
-            border-left: 4px solid #dc3545;
-            color: #721c24;
-        }}
-        
-        /* Dynamically styled elements */
-        .stMarkdown {{
-            color: {theme['text']};
-        }}
-        
-        h1, h2, h3, h4, h5, h6 {{
-            color: {theme['primary']};
-        }}
-    </style>
-    """
-    st.markdown(css, unsafe_allow_html=True)
-
-# Initialize session state for theme
-if "theme" not in st.session_state:
-    st.session_state.theme = "Light"
-
-# Page config
+# Page config (MUST be first Streamlit command)
 st.set_page_config(
     page_title="ArduPilot Flight Analyzer",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Apply selected theme
-apply_theme_css(st.session_state.theme)
+# =====================================================
+# DARK THEME - APPLIED GLOBALLY
+# =====================================================
 
-st.title("🚀 ArduPilot Flight Log Analyzer")
+# Dark theme colors
+DARK_THEME = {
+    "bg_primary": "#0f172a",      # Main background
+    "bg_secondary": "#1e293b",    # Cards, containers
+    "bg_tertiary": "#334155",     # Hover, borders
+    "text_primary": "#f1f5f9",    # Main text
+    "text_secondary": "#cbd5e1",  # Secondary text
+    "accent": "#3b82f6",          # Primary accent (blue)
+    "success": "#10b981",         # Success green
+    "warning": "#f59e0b",         # Warning orange
+    "error": "#ef4444",           # Error red
+}
+
+# Apply dark theme globally
+st.markdown(
+    f"""
+    <style>
+    /* Root variables */
+    :root {{
+        --bg-primary: {DARK_THEME['bg_primary']};
+        --bg-secondary: {DARK_THEME['bg_secondary']};
+        --bg-tertiary: {DARK_THEME['bg_tertiary']};
+        --text-primary: {DARK_THEME['text_primary']};
+        --text-secondary: {DARK_THEME['text_secondary']};
+        --accent: {DARK_THEME['accent']};
+    }}
+
+    /* Main app background */
+    html, body {{
+        background-color: {DARK_THEME['bg_primary']} !important;
+        color: {DARK_THEME['text_primary']} !important;
+    }}
+
+    .stApp {{
+        background-color: {DARK_THEME['bg_primary']} !important;
+    }}
+
+    [data-testid="stAppViewContainer"] {{
+        background-color: {DARK_THEME['bg_primary']} !important;
+    }}
+
+    /* Sidebar */
+    [data-testid="stSidebar"] {{
+        background-color: {DARK_THEME['bg_secondary']} !important;
+    }}
+
+    [data-testid="stSidebar"] > div {{
+        background-color: {DARK_THEME['bg_secondary']} !important;
+    }}
+
+    /* Text elements */
+    body, .stMarkdown, .stText, p, span, div {{
+        color: {DARK_THEME['text_primary']} !important;
+    }}
+
+    /* Headers */
+    h1, h2, h3, h4, h5, h6 {{
+        color: {DARK_THEME['accent']} !important;
+    }}
+
+    /* Metric containers */
+    [data-testid="metric-container"] {{
+        background-color: {DARK_THEME['bg_secondary']} !important;
+        border-left: 4px solid {DARK_THEME['accent']} !important;
+    }}
+
+    /* Buttons */
+    .stButton > button {{
+        background-color: {DARK_THEME['accent']} !important;
+        color: white !important;
+        border: none !important;
+    }}
+
+    .stButton > button:hover {{
+        background-color: #2563eb !important;
+    }}
+
+    /* Input fields */
+    input, textarea, select {{
+        background-color: {DARK_THEME['bg_secondary']} !important;
+        color: {DARK_THEME['text_primary']} !important;
+        border: 1px solid {DARK_THEME['bg_tertiary']} !important;
+    }}
+
+    input::placeholder {{
+        color: {DARK_THEME['text_secondary']} !important;
+    }}
+
+    /* Expander */
+    .streamlit-expanderHeader {{
+        background-color: {DARK_THEME['bg_secondary']} !important;
+        color: {DARK_THEME['text_primary']} !important;
+    }}
+
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] {{
+        background-color: {DARK_THEME['bg_secondary']} !important;
+    }}
+
+    .stTabs [data-baseweb="tab"] {{
+        color: {DARK_THEME['text_secondary']} !important;
+    }}
+
+    .stTabs [aria-selected="true"] {{
+        color: {DARK_THEME['accent']} !important;
+    }}
+
+    /* Checkboxes and radio buttons */
+    .stCheckbox > label {{
+        color: {DARK_THEME['text_primary']} !important;
+    }}
+
+    /* Select box */
+    .stSelectbox > div > div {{
+        background-color: {DARK_THEME['bg_secondary']} !important;
+        color: {DARK_THEME['text_primary']} !important;
+        border: 1px solid {DARK_THEME['bg_tertiary']} !important;
+    }}
+
+    /* Slider */
+    .stSlider > div > div > div {{
+        color: {DARK_THEME['text_primary']} !important;
+    }}
+
+    /* Tooltip and help text */
+    [data-tooltip] {{
+        background-color: {DARK_THEME['bg_secondary']} !important;
+        color: {DARK_THEME['text_primary']} !important;
+        border: 1px solid {DARK_THEME['bg_tertiary']} !important;
+    }}
+
+    /* Info, warning, error boxes */
+    .stAlert {{
+        background-color: {DARK_THEME['bg_secondary']} !important;
+        color: {DARK_THEME['text_primary']} !important;
+        border-left: 4px solid {DARK_THEME['accent']} !important;
+    }}
+
+    /* Success box */
+    .success-box {{
+        background-color: rgba(16, 185, 129, 0.1) !important;
+        color: {DARK_THEME['success']} !important;
+        border-left: 4px solid {DARK_THEME['success']} !important;
+        padding: 15px !important;
+        border-radius: 5px !important;
+    }}
+
+    /* Warning box */
+    .warning-box {{
+        background-color: rgba(245, 158, 11, 0.1) !important;
+        color: {DARK_THEME['warning']} !important;
+        border-left: 4px solid {DARK_THEME['warning']} !important;
+        padding: 15px !important;
+        border-radius: 5px !important;
+    }}
+
+    /* Danger box */
+    .danger-box {{
+        background-color: rgba(239, 68, 68, 0.1) !important;
+        color: {DARK_THEME['error']} !important;
+        border-left: 4px solid {DARK_THEME['error']} !important;
+        padding: 15px !important;
+        border-radius: 5px !important;
+    }}
+
+    /* Table styling */
+    .stDataFrame {{
+        background-color: {DARK_THEME['bg_secondary']} !important;
+    }}
+
+    .dataframe {{
+        background-color: {DARK_THEME['bg_secondary']} !important;
+        color: {DARK_THEME['text_primary']} !important;
+    }}
+
+    /* Links */
+    a {{
+        color: {DARK_THEME['accent']} !important;
+    }}
+
+    a:hover {{
+        color: #2563eb !important;
+    }}
+
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown("""
+<h1 style='text-align: center;'>🚀 ArduPilot Flight Log Analyzer</h1>
+<p style='text-align: center; font-size:18px;'>
+Professional drone telemetry analysis platform
+</p>
+""", unsafe_allow_html=True)
 
 # Sidebar
 with st.sidebar:
@@ -156,18 +255,6 @@ with st.sidebar:
     
     st.markdown("---")
     st.header("⚙️ Options")
-    
-    # Theme selector
-    selected_theme = st.selectbox(
-        "🎨 Select Theme",
-        list(THEMES.keys()),
-        index=list(THEMES.keys()).index(st.session_state.theme),
-        help="Choose a color theme for the entire application"
-    )
-    
-    if selected_theme != st.session_state.theme:
-        st.session_state.theme = selected_theme
-        st.rerun()
     
     enable_ai = st.checkbox(
         "Enable AI Analysis",
