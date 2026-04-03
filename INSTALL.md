@@ -150,8 +150,7 @@ d:/PyCharm/PyCharmProjects/
 ├── README.md                     # This file
 ├── QUICK_START.md               # 2-minute quickstart
 ├── INSTALL.md                   # Installation instructions
-├── TECHNICAL_JUSTIFICATION.md    # Technology choices & math (NEW!)
-├── ENHANCED_FEATURES.md          # New features documentation
+├── TECHNICAL_JUSTIFICATION.md    # Technology choices & math
 └── example.py                    # Example script
 ├── .streamlit/
 │   └── config.toml                # Streamlit configuration
@@ -188,7 +187,3 @@ To add new features:
 2. Update `app/core/__init__.py` with exports
 3. Add tests in the function docstrings
 4. Update documentation in README.md
-
-## License
-
-MIT License - Free to use and distribute
