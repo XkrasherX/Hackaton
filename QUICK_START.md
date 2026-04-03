@@ -132,7 +132,6 @@ See `example.py` for complete working examples.
 
 ```
 app/
-├── main.py                  # Command-line interface
 ├── theory.py                # Mathematical foundations
 └── core/
     ├── app.py              # Streamlit web application
