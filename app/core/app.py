@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import tempfile
 import os
+import base64
 import logging
 import plotly.graph_objects as go
 
@@ -35,9 +36,76 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Hide heading link icons globally
+st.markdown(
+    """
+    <style>
+    [data-testid="stHeaderActionElements"] {
+        display: none !important;
+    }
+    [data-testid="stAppDeployButton"] {
+        display: none !important;
+    }
+    [data-testid="stSidebarUserContent"] {
+        padding-top: 0.1rem !important;
+    }
+    button[aria-label="Show password text"],
+    button[title="Show password text"] {
+        display: none !important;
+    }
+    .sidebar-link-list {
+        display: grid;
+        gap: 0.65rem;
+        margin-top: 0.25rem;
+    }
+    .sidebar-link-card {
+        display: block;
+        padding: 0.8rem 0.9rem;
+        border: 1px solid rgba(128, 140, 160, 0.25);
+        border-radius: 14px;
+        text-decoration: none !important;
+        background: rgba(255, 255, 255, 0.03);
+        transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+    .sidebar-link-card:hover {
+        transform: translateY(-1px);
+        border-color: rgba(31, 119, 180, 0.7);
+        background: rgba(31, 119, 180, 0.08);
+    }
+    .sidebar-link-title {
+        display: block;
+        font-weight: 700;
+        font-size: 0.98rem;
+        line-height: 1.2;
+        color: inherit;
+        margin-bottom: 0.18rem;
+    }
+    .sidebar-link-subtitle {
+        display: block;
+        font-size: 0.82rem;
+        opacity: 0.75;
+        line-height: 1.35;
+        color: inherit;
+    }
+    .sidebar-logo-wrap {
+        display: flex;
+        justify-content: center;
+        margin: -0.9rem 0 0.35rem 0;
+    }
+    .sidebar-logo-img {
+        width: 165px;
+        max-width: 100%;
+        height: auto;
+        display: block;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 
 st.markdown("""
-<h1 style='text-align: center;'> ArduPilot Flight Log Analyzer</h1>
+<h1 style='text-align: center;'> ArduPilot Flight Analyzer</h1>
 <p style='text-align: center; font-size:18px;'>
 Professional drone telemetry analysis platform
 </p>
@@ -45,7 +113,20 @@ Professional drone telemetry analysis platform
 
 # Sidebar
 with st.sidebar:
-    st.header("- About")
+    logo_path = os.path.join(os.path.dirname(__file__), "..", "images", "ardupilot-logo.png")
+    if os.path.exists(logo_path):
+        with open(logo_path, "rb") as logo_file:
+            logo_b64 = base64.b64encode(logo_file.read()).decode("utf-8")
+        st.markdown(
+            f"""
+            <div class="sidebar-logo-wrap">
+                <img class="sidebar-logo-img" src="data:image/png;base64,{logo_b64}" alt="ArduPilot Logo" />
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.header("About")
     st.markdown("""
     Advanced flight log analysis tool for ArduPilot-based systems.
     
@@ -62,8 +143,6 @@ with st.sidebar:
     """)
     
     st.markdown("---")
-    st.header("- Options")
-    st.markdown("---")
     
     enable_ai = st.checkbox(
         "Enable AI Analysis",
@@ -78,14 +157,26 @@ with st.sidebar:
     )
     
     st.markdown("---")
-    st.header("- Links")
-    st.markdown("[GitHub](https://github.com/XkrasherX/Hackaton.git)")
-    st.markdown("[Documentation](https://github.com/XkrasherX/Hackaton/blob/master/README.md)")
-    st.markdown("[Support](https://github.com/Nestors1234/ArduPilot-Flight-Log-Analyzer/issues)")
+    st.header("Links")
+    st.markdown(
+        """
+        <div class="sidebar-link-list">
+            <a class="sidebar-link-card" href="https://github.com/XkrasherX/Hackaton.git" target="_blank" rel="noopener noreferrer">
+                <span class="sidebar-link-title">GitHub</span>
+                <span class="sidebar-link-subtitle">Source code repository</span>
+            </a>
+            <a class="sidebar-link-card" href="https://github.com/XkrasherX/Hackaton/blob/master/README.md" target="_blank" rel="noopener noreferrer">
+                <span class="sidebar-link-title">Documentation</span>
+                <span class="sidebar-link-subtitle">Setup and usage guide</span>
+            </a>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     
     st.markdown("---")
     st.markdown("""
-    <small> **ArduPilot Flight Log Analyzer**  
+    <small> **ArduPilot Flight Analyzer**  
     Advanced analysis tool for drone flight logs  
     Version 0.4 | April 2026</small>
     """, unsafe_allow_html=True)
@@ -109,7 +200,7 @@ if uploaded_file is not None:
         tmp_file.write(uploaded_file.read())
         tmp_path = tmp_file.name
 
-    st.success("[OK] File uploaded successfully!")
+    st.success("File uploaded successfully!")
 
     # Parse log file
     try:
@@ -551,6 +642,6 @@ if uploaded_file is not None:
 # Footer
 st.markdown("---")
 st.markdown("""
-**ArduPilot Flight Log Analyzer** |  
+**ArduPilot Flight Analyzer** |  
 [GitHub](https://github.com/XkrasherX/Hackaton.git) • [Documentation](https://github.com/XkrasherX/Hackaton/blob/master/README.md) • [Support](https://github.com)
 """)
