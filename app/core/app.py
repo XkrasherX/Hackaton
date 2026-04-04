@@ -184,7 +184,7 @@ with st.sidebar:
 st.markdown("""
 **Advanced flight analysis for ArduPilot flight controllers**
 
-Upload your log files to analyze flight characteristics, detect anomalies, and visualize trajectories.
+Upload your log files to analyze flight characteristics, detect anomalies, and visualize trajectories
 """)
 
 uploaded_file = st.file_uploader(
@@ -638,10 +638,3 @@ if uploaded_file is not None:
                 os.remove(tmp_path)
         except:
             pass
-
-# Footer
-st.markdown("---")
-st.markdown("""
-**ArduPilot Flight Analyzer** |  
-[GitHub](https://github.com/XkrasherX/Hackaton.git) • [Documentation](https://github.com/XkrasherX/Hackaton/blob/master/README.md) • [Support](https://github.com)
-""")

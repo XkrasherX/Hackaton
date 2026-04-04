@@ -5,7 +5,7 @@ AI Assistant for Flight Analysis using LLM (Groq)
 import os
 import json
 import logging
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 
 import pandas as pd
 import numpy as np
@@ -71,7 +71,7 @@ Return ONLY this JSON structure:
 }}
 """
 
-        response = client.messages.create(
+        response = client.chat.completions.create(
             model=LLM_MODEL,
             max_tokens=LLM_MAX_TOKENS,
             messages=[{"role": "user", "content": prompt}]
@@ -96,12 +96,35 @@ Return ONLY this JSON structure:
 # LLM Helpers
 # =========================
 
-def safe_extract_llm_text(response) -> str:
+def safe_extract_llm_text(response: Any) -> str:
 
     try:
-        return response.content[0].text.strip()
-    except Exception:
+        # Groq chat completions format: response.choices[0].message.content
+        if hasattr(response, "choices") and response.choices:
+            message = getattr(response.choices[0], "message", None)
+            content = getattr(message, "content", "") if message else ""
+            if isinstance(content, str):
+                return content.strip()
+
+        # Backward/alternate structure fallback
+        if hasattr(response, "content") and response.content:
+            first = response.content[0]
+            text = getattr(first, "text", "")
+            if isinstance(text, str):
+                return text.strip()
+
+        # Dict-like fallback
+        if isinstance(response, dict):
+            choices = response.get("choices", [])
+            if choices:
+                content = choices[0].get("message", {}).get("content", "")
+                if isinstance(content, str):
+                    return content.strip()
+
         logger.warning("Unexpected LLM response structure.")
+        return ""
+    except Exception:
+        logger.warning("Failed to extract text from LLM response.")
         return ""
 
 
