@@ -1,4 +1,9 @@
 import streamlit as st
+
+st.set_page_config(
+    page_title="ArduPilot Log Analyzer",
+    page_icon="app/images/ardupilot-web-logo.jpg"
+)
 import pandas as pd
 import numpy as np
 import tempfile
