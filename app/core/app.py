@@ -21,9 +21,9 @@ from visualization import plot_3d_trajectory, plot_2d_top_view, plot_altitude_pr
 from ai_analysis import analyze_flight_with_ai, format_analysis_for_display
 
 try:
-    import streamlit_folium
+    from streamlit_folium import st_folium
 except ImportError:
-    streamlit_folium = None
+    st_folium = None
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -396,7 +396,7 @@ if uploaded_file is not None:
                 width=None,
                 height=400
             )
-            st.plotly_chart(fig_alt, use_container_width=True)
+            st.plotly_chart(fig_alt, width='stretch')
 
         with st.expander("Speed Profile Over Time", expanded=False):
             speed_data = pd.DataFrame({
@@ -429,7 +429,7 @@ if uploaded_file is not None:
                 width=None,
                 height=400
             )
-            st.plotly_chart(fig_speed, use_container_width=True)
+            st.plotly_chart(fig_speed, width='stretch')
 
         # === VISUALIZATION TABS ===
 
@@ -452,7 +452,7 @@ if uploaded_file is not None:
 
             try:
                 fig = plot_3d_trajectory(gps_df, color_mode=color_mode)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
                 st.markdown("""
                 **How to use:**
                 - Rotate: Click and drag to rotate
@@ -478,7 +478,7 @@ if uploaded_file is not None:
             
             try:
                 fig2d = plot_2d_top_view(gps_df, color_mode=color_mode2)
-                st.plotly_chart(fig2d, use_container_width=True)
+                st.plotly_chart(fig2d, width='stretch')
                 st.markdown("""
                 **Top-down view shows:**
                 - Green diamond (🟢 Start): Starting position
@@ -493,7 +493,7 @@ if uploaded_file is not None:
             
             try:
                 fig_alt = plot_altitude_profile(gps_df)
-                st.plotly_chart(fig_alt, use_container_width=True)
+                st.plotly_chart(fig_alt, width='stretch')
                 st.markdown("""
                 **Profile Analysis:**
                 - Blue line (🔵 Altitude): Altitude over distance (left axis)
@@ -505,9 +505,9 @@ if uploaded_file is not None:
         
         with tab4:
             try:
-                if streamlit_folium:
+                if st_folium:
                     map_flight = plot_flight_map(gps_df)
-                    streamlit_folium.folium_static(map_flight)
+                    st_folium(map_flight, returned_objects=[])
                     st.markdown("### Interactive Flight Map")
 
                     st.markdown("""
@@ -586,7 +586,7 @@ if uploaded_file is not None:
                 data=csv_gps,
                 file_name=f"{os.path.splitext(uploaded_file.name)[0]}_gps.csv",
                 mime="text/csv",
-                use_container_width=True
+                width='stretch'
             )
         
         with col_imu:
@@ -597,7 +597,7 @@ if uploaded_file is not None:
                     data=csv_imu,
                     file_name=f"{os.path.splitext(uploaded_file.name)[0]}_imu.csv",
                     mime="text/csv",
-                    use_container_width=True
+                    width='stretch'
                 )
             else:
                 st.info("No IMU data available")
@@ -617,7 +617,7 @@ if uploaded_file is not None:
                     data=csv_combined,
                     file_name=f"{os.path.splitext(uploaded_file.name)[0]}_combined.csv",
                     mime="text/csv",
-                    use_container_width=True
+                    width='stretch'
                 )
             except Exception as e:
                 st.info("Combined export unavailable")
