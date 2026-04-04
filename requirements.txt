@@ -5,6 +5,6 @@ pyproj
 plotly
 scipy
 streamlit
-groq
+openai
 folium
 streamlit-folium

@@ -150,10 +150,10 @@ with st.sidebar:
         help="Use LLM to analyze flight patterns and generate insights"
     )
     
-    groq_api_key = st.text_input(
-        "Groq API Key (Optional)",
+    openrouter_api_key = st.text_input(
+        "OpenRouter API Key (Optional)",
         type="password",
-        help="Get free key from https://console.groq.com/"
+        help="Get free key from https://openrouter.ai/"
     )
     
     st.markdown("---")
@@ -533,7 +533,7 @@ if uploaded_file is not None:
                     metrics,
                     gps_df,
                     imu_df,
-                    api_key=groq_api_key if groq_api_key else None
+                    api_key=openrouter_api_key if openrouter_api_key else None
                 )
             
             # Display AI analysis

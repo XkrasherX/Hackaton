@@ -10,7 +10,7 @@ pip install -r requirements.txt
 
 **Optional: AI Analysis Support**
 ```bash
-pip install groq
+pip install openai
 ```
 
 ## Step 2: Run the Web Application
@@ -44,27 +44,26 @@ System automatically uses rule-based analysis:
 
 Accuracy: ~80% of LLM-powered analysis
 
-### With Groq API Key
+### With OpenRouter API Key
 
 For expert-level AI analysis:
 
-1. Sign up (free): https://console.groq.com/
+1. Sign up (free): https://openrouter.ai/
 2. Copy API key (no credit card required)
 3. Set environment variable:
    ```bash
    # Windows
-   set GROQ_API_KEY=your_key_here
+    set OPENROUTER_API_KEY=your_key_here
    
    # macOS/Linux
-   export GROQ_API_KEY=your_key_here
+    export OPENROUTER_API_KEY=your_key_here
    ```
 4. Restart Streamlit app
-5. Receive expert-level analysis from Mixtral-8x7B AI
+5. Receive expert-level analysis from Qwen3.6 Plus (free)
 
-**Free Tier Limits:**
-- 30 API requests per minute
-- No rate limiting on response length
-- Sufficient for flight analysis
+**Model Used:**
+- qwen/qwen3.6-plus:free
+- Free tier availability may change based on OpenRouter limits
 
 ## Testing with Provided Examples
 
@@ -125,7 +124,7 @@ See `example.py` for complete working examples.
 | **Coordinates** | WGS-84 → ENU | GPS transformations |
 | **Metrics** | Haversine | Distance with ±0.5% accuracy |
 | **Orientation** | Quaternion | Gimbal-lock free representation |
-| **AI** | Mixtral-8x7B | Free tier, 30 req/minute |
+| **AI** | Qwen3.6 Plus (free) | OpenRouter API |
 | **Fallback** | Rule-based | Works offline, ~80% accuracy |
 
 ## Project Structure
@@ -177,7 +176,7 @@ streamlit run app/core/app.py --server.port 8502
 1.  Run Streamlit web app
 2.  Upload your flight log
 3.  Review metrics and visualizations
-4.  Optional: Configure Groq API key for AI analysis
+4.  Optional: Configure OpenRouter API key for AI analysis
 5.  Export processed data to CSV
 
 ---
