@@ -1,11 +1,11 @@
 """
-AI Assistant for Flight Analysis using LLM (Groq)
+AI Assistant for Flight Analysis using LLM (OpenRouter)
 """
 
 import os
 import json
 import logging
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 
 import pandas as pd
 import numpy as np
@@ -22,7 +22,7 @@ MAX_SAFE_V_SPEED = 20.0
 MAX_SAFE_ACC = 50.0
 MIN_EXPECTED_ACC = 10.0
 
-LLM_MODEL = "mixtral-8x7b-32768"
+LLM_MODEL = "qwen/qwen3.6-plus:free"
 LLM_MAX_TOKENS = 1024
 
 
@@ -38,20 +38,23 @@ def analyze_flight_with_ai(
 ) -> Dict[str, str]:
 
 
-    api_key = api_key or os.getenv("GROQ_API_KEY")
+    api_key = api_key or os.getenv("OPENROUTER_API_KEY")
 
     if not api_key:
-        logger.warning("GROQ_API_KEY not found. Using fallback analysis.")
+        logger.warning("OPENROUTER_API_KEY not found. Using fallback analysis.")
         return fallback_flight_analysis(metrics, gps_df, imu_df)
 
     try:
-        from groq import Groq
+        from openai import OpenAI
     except ImportError:
-        logger.warning("groq package not installed. Using fallback analysis.")
+        logger.warning("openai package not installed. Using fallback analysis.")
         return fallback_flight_analysis(metrics, gps_df, imu_df)
 
     try:
-        client = Groq(api_key=api_key)
+        client = OpenAI(
+            api_key=api_key,
+            base_url="https://openrouter.ai/api/v1"
+        )
 
         flight_summary = prepare_flight_summary(metrics, gps_df, imu_df)
 
@@ -71,7 +74,7 @@ Return ONLY this JSON structure:
 }}
 """
 
-        response = client.messages.create(
+        response = client.chat.completions.create(
             model=LLM_MODEL,
             max_tokens=LLM_MAX_TOKENS,
             messages=[{"role": "user", "content": prompt}]
@@ -88,7 +91,7 @@ Return ONLY this JSON structure:
         return result
 
     except Exception as e:
-        logger.error(f"Groq API error: {e}")
+        logger.error(f"OpenRouter API error: {e}")
         return fallback_flight_analysis(metrics, gps_df, imu_df)
 
 
@@ -96,12 +99,35 @@ Return ONLY this JSON structure:
 # LLM Helpers
 # =========================
 
-def safe_extract_llm_text(response) -> str:
+def safe_extract_llm_text(response: Any) -> str:
 
     try:
-        return response.content[0].text.strip()
-    except Exception:
+        # OpenRouter/OpenAI chat completions format: response.choices[0].message.content
+        if hasattr(response, "choices") and response.choices:
+            message = getattr(response.choices[0], "message", None)
+            content = getattr(message, "content", "") if message else ""
+            if isinstance(content, str):
+                return content.strip()
+
+        # Backward/alternate structure fallback
+        if hasattr(response, "content") and response.content:
+            first = response.content[0]
+            text = getattr(first, "text", "")
+            if isinstance(text, str):
+                return text.strip()
+
+        # Dict-like fallback
+        if isinstance(response, dict):
+            choices = response.get("choices", [])
+            if choices:
+                content = choices[0].get("message", {}).get("content", "")
+                if isinstance(content, str):
+                    return content.strip()
+
         logger.warning("Unexpected LLM response structure.")
+        return ""
+    except Exception:
+        logger.warning("Failed to extract text from LLM response.")
         return ""
 
 

@@ -1,8 +1,14 @@
 import streamlit as st
+
+st.set_page_config(
+    page_title="ArduPilot Log Analyzer",
+    page_icon="app/images/ardupilot-web-logo.jpg"
+)
 import pandas as pd
 import numpy as np
 import tempfile
 import os
+import base64
 import logging
 import plotly.graph_objects as go
 
@@ -20,9 +26,9 @@ from visualization import plot_3d_trajectory, plot_2d_top_view, plot_altitude_pr
 from ai_analysis import analyze_flight_with_ai, format_analysis_for_display
 
 try:
-    import streamlit_folium
+    from streamlit_folium import st_folium
 except ImportError:
-    streamlit_folium = None
+    st_folium = None
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -35,9 +41,76 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Hide heading link icons globally
+st.markdown(
+    """
+    <style>
+    [data-testid="stHeaderActionElements"] {
+        display: none !important;
+    }
+    [data-testid="stAppDeployButton"] {
+        display: none !important;
+    }
+    [data-testid="stSidebarUserContent"] {
+        padding-top: 0.1rem !important;
+    }
+    button[aria-label="Show password text"],
+    button[title="Show password text"] {
+        display: none !important;
+    }
+    .sidebar-link-list {
+        display: grid;
+        gap: 0.65rem;
+        margin-top: 0.25rem;
+    }
+    .sidebar-link-card {
+        display: block;
+        padding: 0.8rem 0.9rem;
+        border: 1px solid rgba(128, 140, 160, 0.25);
+        border-radius: 14px;
+        text-decoration: none !important;
+        background: rgba(255, 255, 255, 0.03);
+        transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+    .sidebar-link-card:hover {
+        transform: translateY(-1px);
+        border-color: rgba(31, 119, 180, 0.7);
+        background: rgba(31, 119, 180, 0.08);
+    }
+    .sidebar-link-title {
+        display: block;
+        font-weight: 700;
+        font-size: 0.98rem;
+        line-height: 1.2;
+        color: inherit;
+        margin-bottom: 0.18rem;
+    }
+    .sidebar-link-subtitle {
+        display: block;
+        font-size: 0.82rem;
+        opacity: 0.75;
+        line-height: 1.35;
+        color: inherit;
+    }
+    .sidebar-logo-wrap {
+        display: flex;
+        justify-content: center;
+        margin: -0.9rem 0 0.35rem 0;
+    }
+    .sidebar-logo-img {
+        width: 165px;
+        max-width: 100%;
+        height: auto;
+        display: block;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 
 st.markdown("""
-<h1 style='text-align: center;'> ArduPilot Flight Log Analyzer</h1>
+<h1 style='text-align: center;'> ArduPilot Flight Analyzer</h1>
 <p style='text-align: center; font-size:18px;'>
 Professional drone telemetry analysis platform
 </p>
@@ -45,7 +118,20 @@ Professional drone telemetry analysis platform
 
 # Sidebar
 with st.sidebar:
-    st.header("- About")
+    logo_path = os.path.join(os.path.dirname(__file__), "..", "images", "ardupilot-logo.png")
+    if os.path.exists(logo_path):
+        with open(logo_path, "rb") as logo_file:
+            logo_b64 = base64.b64encode(logo_file.read()).decode("utf-8")
+        st.markdown(
+            f"""
+            <div class="sidebar-logo-wrap">
+                <img class="sidebar-logo-img" src="data:image/png;base64,{logo_b64}" alt="ArduPilot Logo" />
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.header("About")
     st.markdown("""
     Advanced flight log analysis tool for ArduPilot-based systems.
     
@@ -62,8 +148,6 @@ with st.sidebar:
     """)
     
     st.markdown("---")
-    st.header("- Options")
-    st.markdown("---")
     
     enable_ai = st.checkbox(
         "Enable AI Analysis",
@@ -71,21 +155,33 @@ with st.sidebar:
         help="Use LLM to analyze flight patterns and generate insights"
     )
     
-    groq_api_key = st.text_input(
-        "Groq API Key (Optional)",
+    openrouter_api_key = st.text_input(
+        "OpenRouter API Key (Optional)",
         type="password",
-        help="Get free key from https://console.groq.com/"
+        help="Get free key from https://openrouter.ai/"
     )
     
     st.markdown("---")
-    st.header("- Links")
-    st.markdown("[GitHub](https://github.com/XkrasherX/Hackaton.git)")
-    st.markdown("[Documentation](https://github.com/XkrasherX/Hackaton/blob/master/README.md)")
-    st.markdown("[Support](https://github.com/Nestors1234/ArduPilot-Flight-Log-Analyzer/issues)")
+    st.header("Links")
+    st.markdown(
+        """
+        <div class="sidebar-link-list">
+            <a class="sidebar-link-card" href="https://github.com/XkrasherX/Hackaton.git" target="_blank" rel="noopener noreferrer">
+                <span class="sidebar-link-title">GitHub</span>
+                <span class="sidebar-link-subtitle">Source code repository</span>
+            </a>
+            <a class="sidebar-link-card" href="https://github.com/XkrasherX/Hackaton/blob/master/README.md" target="_blank" rel="noopener noreferrer">
+                <span class="sidebar-link-title">Documentation</span>
+                <span class="sidebar-link-subtitle">Setup and usage guide</span>
+            </a>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     
     st.markdown("---")
     st.markdown("""
-    <small> **ArduPilot Flight Log Analyzer**  
+    <small> **ArduPilot Flight Analyzer**  
     Advanced analysis tool for drone flight logs  
     Version 0.4 | April 2026</small>
     """, unsafe_allow_html=True)
@@ -93,7 +189,7 @@ with st.sidebar:
 st.markdown("""
 **Advanced flight analysis for ArduPilot flight controllers**
 
-Upload your log files to analyze flight characteristics, detect anomalies, and visualize trajectories.
+Upload your log files to analyze flight characteristics, detect anomalies, and visualize trajectories
 """)
 
 uploaded_file = st.file_uploader(
@@ -109,7 +205,7 @@ if uploaded_file is not None:
         tmp_file.write(uploaded_file.read())
         tmp_path = tmp_file.name
 
-    st.success("[OK] File uploaded successfully!")
+    st.success("File uploaded successfully!")
 
     # Parse log file
     try:
@@ -305,7 +401,7 @@ if uploaded_file is not None:
                 width=None,
                 height=400
             )
-            st.plotly_chart(fig_alt, use_container_width=True)
+            st.plotly_chart(fig_alt, width='stretch')
 
         with st.expander("Speed Profile Over Time", expanded=False):
             speed_data = pd.DataFrame({
@@ -338,7 +434,7 @@ if uploaded_file is not None:
                 width=None,
                 height=400
             )
-            st.plotly_chart(fig_speed, use_container_width=True)
+            st.plotly_chart(fig_speed, width='stretch')
 
         # === VISUALIZATION TABS ===
 
@@ -361,7 +457,7 @@ if uploaded_file is not None:
 
             try:
                 fig = plot_3d_trajectory(gps_df, color_mode=color_mode)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
                 st.markdown("""
                 **How to use:**
                 - Rotate: Click and drag to rotate
@@ -387,7 +483,7 @@ if uploaded_file is not None:
             
             try:
                 fig2d = plot_2d_top_view(gps_df, color_mode=color_mode2)
-                st.plotly_chart(fig2d, use_container_width=True)
+                st.plotly_chart(fig2d, width='stretch')
                 st.markdown("""
                 **Top-down view shows:**
                 - Green diamond (🟢 Start): Starting position
@@ -402,7 +498,7 @@ if uploaded_file is not None:
             
             try:
                 fig_alt = plot_altitude_profile(gps_df)
-                st.plotly_chart(fig_alt, use_container_width=True)
+                st.plotly_chart(fig_alt, width='stretch')
                 st.markdown("""
                 **Profile Analysis:**
                 - Blue line (🔵 Altitude): Altitude over distance (left axis)
@@ -414,9 +510,9 @@ if uploaded_file is not None:
         
         with tab4:
             try:
-                if streamlit_folium:
+                if st_folium:
                     map_flight = plot_flight_map(gps_df)
-                    streamlit_folium.folium_static(map_flight)
+                    st_folium(map_flight, returned_objects=[])
                     st.markdown("### Interactive Flight Map")
 
                     st.markdown("""
@@ -442,7 +538,7 @@ if uploaded_file is not None:
                     metrics,
                     gps_df,
                     imu_df,
-                    api_key=groq_api_key if groq_api_key else None
+                    api_key=openrouter_api_key if openrouter_api_key else None
                 )
             
             # Display AI analysis
@@ -495,7 +591,7 @@ if uploaded_file is not None:
                 data=csv_gps,
                 file_name=f"{os.path.splitext(uploaded_file.name)[0]}_gps.csv",
                 mime="text/csv",
-                use_container_width=True
+                width='stretch'
             )
         
         with col_imu:
@@ -506,7 +602,7 @@ if uploaded_file is not None:
                     data=csv_imu,
                     file_name=f"{os.path.splitext(uploaded_file.name)[0]}_imu.csv",
                     mime="text/csv",
-                    use_container_width=True
+                    width='stretch'
                 )
             else:
                 st.info("No IMU data available")
@@ -526,7 +622,7 @@ if uploaded_file is not None:
                     data=csv_combined,
                     file_name=f"{os.path.splitext(uploaded_file.name)[0]}_combined.csv",
                     mime="text/csv",
-                    use_container_width=True
+                    width='stretch'
                 )
             except Exception as e:
                 st.info("Combined export unavailable")
@@ -547,10 +643,3 @@ if uploaded_file is not None:
                 os.remove(tmp_path)
         except:
             pass
-
-# Footer
-st.markdown("---")
-st.markdown("""
-**ArduPilot Flight Log Analyzer** |  
-[GitHub](https://github.com/XkrasherX/Hackaton.git) • [Documentation](https://github.com/XkrasherX/Hackaton/blob/master/README.md) • [Support](https://github.com)
-""")
