@@ -31,7 +31,6 @@ python app/main.py data/00000001.BIN  # Outputs: CSV, HTML visualization, metric
 python -m venv .venv
 source .venv/bin/activate  # or .\.venv\Scripts\Activate.ps1 on Windows
 pip install -r requirements.txt
-pip install openai        # Optional: for AI analysis via OpenRouter
 ```
 
 **See [TECHNICAL_JUSTIFICATION.md](TECHNICAL_JUSTIFICATION.md) for detailed step-by-step instructions**
@@ -125,7 +124,7 @@ See [TECHNICAL_JUSTIFICATION.md](TECHNICAL_JUSTIFICATION.md) Section 4 for compl
 
 ---
 
-## AI Flight Analysis (NEW!)
+## AI Flight Analysis
 
 ### Features
 The system uses LLM (Large Language Model) via OpenRouter for automatic flight analysis:
@@ -134,14 +133,6 @@ The system uses LLM (Large Language Model) via OpenRouter for automatic flight a
 - **Recommendations**: Suggests improvements for operational procedures
 
 **Important**: The system works without OpenRouter API! If the API key is unavailable, automatic fallback mode is enabled.
-
-### Installation (OPTIONAL)
-
-For LLM functions, install OpenAI SDK (used with OpenRouter endpoint):
-
-```bash
-pip install openai
-```
 
 ### Configuration
 
@@ -229,9 +220,6 @@ python -m venv .venv
 # Install all dependencies
 pip install --upgrade pip  
 pip install -r requirements.txt
-
-# Optional: Install AI support
-pip install groq
 ```
 
 #### On macOS/Linux:
@@ -248,9 +236,6 @@ source .venv/bin/activate
 # Install all dependencies
 pip install --upgrade pip
 pip install -r requirements.txt
-
-# Optional: Install AI support
-pip install groq
 ```
 
 ### **STEP 2: Verify Installation**
@@ -298,26 +283,26 @@ Generates:
 
 *Windows PowerShell:*
 ```powershell
-$env:GROQ_API_KEY = "your_key_here"
+$env:OPENROUTER_API_KEY = "your_key_here"
 streamlit run app/core/app.py
 ```
 
 *Windows Command Prompt:*
 ```cmd
-set GROQ_API_KEY=your_key_here
+set OPENROUTER_API_KEY=your_key_here
 streamlit run app/core/app.py
 ```
 
 *macOS/Linux:*
 ```bash
-export GROQ_API_KEY="your_key_here"
+export OPENROUTER_API_KEY="your_key_here"
 streamlit run app/core/app.py
 ```
 
-**Option B: Get Free Groq API Key**
-1. Visit https://console.groq.com/
+**Option B: Get Free OPENROUTER API Key**
+1. Visit https://openrouter.ai/
 2. Sign up (no credit card required)
-3. Get free API key (30 requests/minute tier)
+3. Get free API key
 4. Set as environment variable above
 
 ### **Common Issues & Solutions**
@@ -359,7 +344,7 @@ pip install -r requirements.txt --force-reinstall
 - **plotly** - Interactive 3D web visualization
 - **streamlit** - Python-only web framework (no HTML/CSS/JS needed)
 - **scipy** - Scientific computing utilities
-- **groq** (optional) - LLM for AI flight analysis
+- **Openrouter** (optional) - LLM for AI flight analysis
 
 ### Technology Choices Explained
 
@@ -385,7 +370,7 @@ pip install -r requirements.txt --force-reinstall
    - Automatic reactive UI updates
    - Minimal boilerplate code
 
-5. **Groq (not OpenAI/Claude)**
+5. **OPENROUTER (not OpenAI/Claude)**
    - Free tier (no credit card)
    - Fastest inference speed (100+ tokens/sec)
    - Mixtral-8x7B model excels at numeric reasoning
@@ -404,7 +389,7 @@ pip install -r requirements.txt --force-reinstall
 - **streamlit** - Web interface
 
 ### Optional
-- **groq** - AI analysis (system works offline without it)
+- **openrouter** - AI analysis (system works offline without it)
 
 ## Installation & Running
 
@@ -546,7 +531,7 @@ analysis = analyze_flight_with_ai(
     metrics_dict,
     gps_df,
     imu_df,
-    groq_api_key="optional"  # Not required
+    openrouter_api_key="optional"  # Not required
 )
 
 # Result
@@ -636,7 +621,7 @@ analysis = analyze_flight_with_ai(
     metrics,
     gps_df,
     imu_df,
-    # groq_api_key="your_key"  # Optional - fallback to rules if not provided
+    # openrouter_api_key="your_key"  # Optional - fallback to rules if not provided
 )
 
 # 4. Display results
